@@ -1,0 +1,281 @@
+.sb-page {
+  max-width: 1300px;
+}
+
+/* Calendar Controls */
+.sb-calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sb-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sb-current-date {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-left: 8px;
+}
+
+.sb-view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+/* Week Grid */
+.sb-week-grid {
+  overflow-x: auto;
+}
+
+.sb-week-header {
+  display: grid;
+  grid-template-columns: 70px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+
+.sb-time-col-header {
+  padding: 12px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.sb-day-header {
+  padding: 12px 8px;
+  text-align: center;
+  border-left: 1px solid var(--border-light);
+}
+
+.sb-day-header.today {
+  background: var(--primary-lighter);
+}
+
+.sb-day-name {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.sb-day-num {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sb-day-header.today .sb-day-num {
+  color: var(--primary);
+}
+
+/* Time Rows */
+.sb-week-body {
+  max-height: calc(100vh - 480px);
+  overflow-y: auto;
+}
+
+.sb-time-row {
+  display: grid;
+  grid-template-columns: 70px repeat(7, 1fr);
+  min-height: 64px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sb-time-label {
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: flex-start;
+}
+
+.sb-cell {
+  border-left: 1px solid var(--border-light);
+  padding: 4px;
+  min-height: 64px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sb-cell:hover {
+  background: var(--bg-secondary);
+}
+
+.sb-cell.today {
+  background: rgba(255, 106, 0, 0.02);
+}
+
+/* Appointment Badge */
+.sb-appt {
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  margin-bottom: 2px;
+  cursor: default;
+  position: relative;
+}
+
+.sb-appt-scheduled {
+  background: var(--info-bg);
+  border-left: 3px solid var(--info);
+}
+
+.sb-appt-confirmed {
+  background: var(--primary-lighter);
+  border-left: 3px solid var(--primary);
+}
+
+.sb-appt-completed {
+  background: var(--success-bg);
+  border-left: 3px solid var(--success);
+}
+
+.sb-appt-cancelled {
+  background: var(--danger-bg);
+  border-left: 3px solid var(--danger);
+  opacity: 0.6;
+}
+
+.sb-appt-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-appt-service {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-appt-actions {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.sb-appt-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  background: rgba(0,0,0,0.06);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.sb-appt-btn:hover {
+  background: var(--info);
+  color: white;
+}
+
+.sb-appt-btn.complete:hover {
+  background: var(--success);
+  color: white;
+}
+
+.sb-appt-btn.cancel:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* Day View */
+.sb-day-view {
+  padding: 16px;
+}
+
+.sb-day-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.sb-day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: calc(100vh - 480px);
+  overflow-y: auto;
+}
+
+.sb-day-slot {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  padding-left: 8px;
+  border-radius: var(--radius-sm);
+}
+
+.sb-day-slot:hover {
+  background: var(--bg-secondary);
+}
+
+.sb-day-time {
+  width: 60px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.sb-day-content {
+  flex: 1;
+}
+
+.sb-day-empty {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  padding: 4px 0;
+}
+
+.sb-day-appt {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 6px;
+}
+
+.sb-day-appt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.sb-day-appt-header strong {
+  font-size: 14px;
+}
+
+.sb-day-appt-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}

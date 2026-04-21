@@ -1,0 +1,39 @@
+.rd-page {
+  max-width: 1300px;
+}
+
+.rd-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.rd-chart-card {
+  min-height: 360px;
+}
+
+.rd-chart-wrapper {
+  padding: 8px 0;
+}
+
+.rd-pie-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rd-period-select {
+  display: flex;
+  align-items: center;
+}
+
+/* Recharts tooltip custom */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+@media (max-width: 1000px) {
+  .rd-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,48 @@
+.history-page {
+  max-width: 1200px;
+}
+
+.history-search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.history-search-bar .pos-search-wrapper {
+  flex: 1;
+}
+
+.order-no-badge {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-lighter);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.history-date, .history-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.history-price {
+  color: var(--text-primary);
+}
+
+.loading-overlay {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .history-search-bar {
+    flex-direction: column;
+  }
+}

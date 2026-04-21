@@ -1,0 +1,248 @@
+.cm-page {
+  max-width: 1200px;
+}
+
+.cm-layout {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 20px;
+  height: calc(100vh - 320px);
+}
+
+.cm-list-section {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cm-customer-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-customer-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--surface);
+}
+
+.cm-customer-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.cm-customer-card.active {
+  border-color: var(--primary);
+  background: var(--primary-lighter);
+}
+
+.cm-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cm-customer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cm-customer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cm-customer-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.cm-customer-detail span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.cm-customer-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.cm-spent {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.cm-visits {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.cm-card-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.cm-customer-card:hover .cm-card-actions {
+  opacity: 1;
+}
+
+/* Detail Panel */
+.cm-detail-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+.cm-detail {
+  padding: 24px;
+}
+
+.cm-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cm-detail-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cm-detail-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cm-detail-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.cm-detail-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cm-detail-notes {
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.cm-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cm-detail-stat {
+  text-align: center;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.cm-ds-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cm-ds-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.cm-history-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.cm-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.cm-history-date {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.cm-history-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cm-no-history {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 20px;
+}
