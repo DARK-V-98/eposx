@@ -117,6 +117,34 @@
   align-items: center;
 }
 
+.pos-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  padding: 0 16px;
+  border-left: 1px solid var(--border-light);
+  min-width: 140px;
+}
+
+.clock-time {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.clock-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* ============================================================
    Categories
    ============================================================ */
@@ -929,4 +957,141 @@
 
 .payment-icon {
   font-size: 24px;
+}
+
+/* ── Checkout Payment Header ── */
+.checkout-payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.split-toggle-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.split-toggle-btn.active {
+  background: var(--primary-lighter);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ── Split Payment Grid ── */
+.split-payment-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.split-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.split-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.split-field .input {
+  width: 140px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.split-status {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+.split-status.ok { color: var(--success); }
+.split-status.err { color: var(--danger); }
+
+/* ── Quick Cash Section ── */
+.quick-cash-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+}
+
+.quick-cash-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.quick-cash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quick-cash-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-cash-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--text-tertiary);
+}
+.quick-cash-btn.active {
+  background: var(--primary-lighter);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.cash-tendered-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cash-tendered-row .input {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.change-due {
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.change-due strong {
+  font-size: 16px;
+  color: var(--success);
 }

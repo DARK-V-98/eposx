@@ -237,6 +237,8 @@ export default function ProductManagement({ showToast }) {
       </div>
     ));
   };
+
+  return (
     <div className="pm-page">
       {/* Header */}
       <div className="page-header">
@@ -600,7 +602,7 @@ export default function ProductManagement({ showToast }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div className="input-group">
                     <label className="input-label">Price *</label>
                     <input className="input" type="number" step="0.01" placeholder="0.00"
@@ -611,11 +613,12 @@ export default function ProductManagement({ showToast }) {
                     <input className="input" type="number" step="0.01" placeholder="0.00"
                       value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
                   </div>
-                  <div className="input-group">
-                    <label className="input-label">Stock</label>
-                    <input className="input" type="number" placeholder="0"
-                      value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Initial Stock</label>
+                  <input className="input" type="number" placeholder="Enter current stock level"
+                    value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
                 </div>
               </div>
 
@@ -695,7 +698,7 @@ export default function ProductManagement({ showToast }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+
       {/* ── Category Modal ──────────────────────────────────────── */}
       <AnimatePresence>
         {showCatModal && (

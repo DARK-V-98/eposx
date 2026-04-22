@@ -19,16 +19,18 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 700,
     title: 'E POS X',
-    icon: path.join(__dirname, 'public', 'icon.png'),
+    icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
-    frame: true,
+    frame: false,
     backgroundColor: '#FFFFFF',
     show: false,
   });
+
+  mainWindow.setMenu(null);
 
   // Load the app
   const isDev = !app.isPackaged;
@@ -355,4 +357,30 @@ ipcMain.handle('db:restore', async () => {
     }
   }
   return { canceled: true };
+});
+
+ipcMain.handle('system:reset', async () => {
+  return db.system.reset();
+});
+
+// ============================================================
+// IPC HANDLERS — Window Controls
+// ============================================================
+
+ipcMain.on('window:minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.on('window:maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.on('window:close', () => {
+  if (mainWindow) mainWindow.close();
 });

@@ -83,5 +83,13 @@ contextBridge.exposeInMainWorld('api', {
   system: {
     backup: () => ipcRenderer.invoke('db:backup'),
     restore: () => ipcRenderer.invoke('db:restore'),
+    reset: () => ipcRenderer.invoke('system:reset'),
+  },
+
+  // Window Controls
+  window: {
+    minimize: () => ipcRenderer.send('window:minimize'),
+    maximize: () => ipcRenderer.send('window:maximize'),
+    close: () => ipcRenderer.send('window:close'),
   },
 });

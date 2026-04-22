@@ -13,6 +13,8 @@ export default function Toast({ message, type = 'success' }) {
       {type === 'success' && '✓'}
       {type === 'error' && '✕'}
       {type === 'info' && 'ℹ'}
+      {type === 'warning' && '⚠'}
+      {type === 'critical' && '‼'}
       {message}
     </motion.div>
   );

@@ -1,0 +1,150 @@
+/* ── Title Bar ── */
+.title-bar {
+  height: 36px;
+  background: linear-gradient(90deg, #141416 0%, #1a1a1e 100%);
+  color: #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  border-bottom: 1px solid #2a2a2e;
+  position: relative;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* Animated orange accent line at bottom */
+.title-bar-accent-line {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 1.5px;
+  width: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,106,0,0.7) 30%,
+    rgba(255,157,0,0.9) 50%,
+    rgba(255,106,0,0.7) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: accentSlide 4s linear infinite;
+}
+@keyframes accentSlide {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Drag region */
+.title-bar-drag-region {
+  flex-grow: 1;
+  height: 100%;
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+}
+
+.title-bar-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-bar-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-logo-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255,106,0,0.4));
+}
+
+.title-bar-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #c0c0c0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Live status dot */
+.title-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+.title-live-text {
+  font-size: 9px;
+  font-weight: 700;
+  color: #10b981;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+/* Controls */
+.title-bar-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.control-button {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #909090;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+  position: relative;
+}
+
+.control-button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.control-button:hover { background: #2d2d31; color: #fff; }
+.control-button.close:hover { background: #e81123; color: #fff; }
+.control-button:active { background: #3a3a3e; }
+.control-button.close:active { background: #c50f1f; }
+
+/* Notification bell */
+.control-button.notification-trigger {
+  width: 42px;
+  position: relative;
+}
+.control-button.notification-trigger.has-new {
+  color: var(--primary, #ff6a00);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 6px; right: 8px;
+  min-width: 14px;
+  height: 14px;
+  background: #ef4444;
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid #141416;
+  pointer-events: none;
+}

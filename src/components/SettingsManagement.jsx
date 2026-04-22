@@ -8,7 +8,9 @@ import {
   HiOutlineGlobeAlt,
   HiOutlineCurrencyDollar,
   HiOutlineDocumentText,
-  HiOutlineSave
+  HiOutlineSave,
+  HiOutlineTrash,
+  HiOutlineExclamation
 } from 'react-icons/hi';
 import './SettingsManagement.css';
 
@@ -16,6 +18,9 @@ const api = (window.api && window.api.settings) ? window.api : {
   settings: {
     getAll: async () => ({}),
     updateAll: async () => ({ success: true }),
+  },
+  system: {
+    reset: async () => ({ success: true }),
   },
 };
 
@@ -55,6 +60,24 @@ export default function SettingsManagement({ showToast }) {
       showToast('Settings updated successfully');
     } catch (err) {
       showToast('Failed to save settings', 'error');
+    }
+  }
+
+  async function handleReset() {
+    const confirmed = window.confirm(
+      "⚠️ DANGER: This will permanently delete all products, services, customers, sales, and appointments. \n\nThis action CANNOT be undone. Are you absolutely sure?"
+    );
+    
+    if (confirmed) {
+      try {
+        await api.system.reset();
+        showToast('System data cleared successfully. Reloading...', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } catch (err) {
+        showToast('Failed to reset system data', 'error');
+      }
     }
   }
 
@@ -200,6 +223,21 @@ export default function SettingsManagement({ showToast }) {
                 placeholder="Message displayed at the bottom of the receipt..."
               />
             </div>
+          </div>
+        </div>
+        {/* Danger Zone */}
+        <div className="card settings-section full-width danger-zone">
+          <div className="card-header">
+            <h3 className="card-title danger-text"><HiOutlineExclamation /> Danger Zone</h3>
+          </div>
+          <div className="settings-form danger-content">
+            <div className="danger-info">
+              <p className="danger-title">Reset System Data</p>
+              <p className="danger-desc">This will permanently delete all products, services, sales, customers, and appointments. Your company profile and settings will remain intact.</p>
+            </div>
+            <button className="btn btn-danger" onClick={handleReset}>
+              <HiOutlineTrash /> Clear All Data
+            </button>
           </div>
         </div>
       </div>

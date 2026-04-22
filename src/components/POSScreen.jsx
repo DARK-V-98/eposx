@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlinePlus,
@@ -60,7 +60,7 @@ function CategoryIcon({ category, isService }) {
   }
 }
 
-export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onDeleteParkedBill }) {
+export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onDeleteParkedBill, addNotification }) {
   const [products, setProducts] = useState([]);
   const [services, setServices] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -76,6 +76,58 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [billNote, setBillNote] = useState('');
 
+  // ── #8 Split Payment ──────────────────────────────────────
+  const [splitEnabled, setSplitEnabled] = useState(false);
+  const [splitCash, setSplitCash] = useState('');
+  const [splitCard, setSplitCard] = useState('');
+
+  // ── #10 Cash tendered (for change calculation) ────────────
+  const [cashTendered, setCashTendered] = useState('');
+
+  // ── #6 Barcode Scanner ───────────────────────────────────
+  const barcodeBuffer = useRef('');
+  const barcodeTimer  = useRef(null);
+
+  useEffect(() => {
+    const handleBarcode = (e) => {
+      // Ignore if user is typing in an input/textarea
+      if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+      if (e.key === 'Enter') {
+        const code = barcodeBuffer.current.trim();
+        barcodeBuffer.current = '';
+        if (code.length >= 3) {
+          const match = products.find(
+            p => (p.barcode && p.barcode === code) ||
+                 (p.sku    && p.sku    === code)
+          );
+          if (match) {
+            addToCart(match);
+            showToast(`✅ Scanned: ${match.name}`, 'success');
+          } else {
+            // Fall back to searching by code in product name
+            const fuzzy = products.find(p =>
+              (p.name || '').toLowerCase().includes(code.toLowerCase())
+            );
+            if (fuzzy) {
+              addToCart(fuzzy);
+              showToast(`✅ Scanned: ${fuzzy.name}`, 'success');
+            } else {
+              showToast(`❌ Barcode not found: ${code}`, 'error');
+            }
+          }
+        }
+        return;
+      }
+      if (e.key.length === 1) {
+        barcodeBuffer.current += e.key;
+        clearTimeout(barcodeTimer.current);
+        barcodeTimer.current = setTimeout(() => { barcodeBuffer.current = ''; }, 120);
+      }
+    };
+    window.addEventListener('keydown', handleBarcode);
+    return () => window.removeEventListener('keydown', handleBarcode);
+  }, [products]);
+
   // Customer selection state
   const [custSearch, setCustSearch] = useState('');
   const [showCustDropdown, setShowCustDropdown] = useState(false);
@@ -85,6 +137,14 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
   // Receipt state
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastSale, setLastSale] = useState(null);
+
+  // Real-time clock
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -296,8 +356,26 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
   }
 
   // ── Checkout ───────────────────────────────────────────────
+  // Split payment validation helper
+  const splitValid = useMemo(() => {
+    if (!splitEnabled) return true;
+    const cash = parseFloat(splitCash) || 0;
+    const card = parseFloat(splitCard) || 0;
+    return Math.abs((cash + card) - totals.total) < 0.01;
+  }, [splitEnabled, splitCash, splitCard, totals.total]);
+
+  // Change due
+  const changeDue = useMemo(() => {
+    if (paymentMethod !== 'cash' || splitEnabled) return 0;
+    const tendered = parseFloat(cashTendered) || 0;
+    return Math.max(0, tendered - totals.total);
+  }, [cashTendered, totals.total, paymentMethod, splitEnabled]);
+
   async function handleCheckout() {
     if (cart.length === 0) return;
+    if (splitEnabled && !splitValid) {
+      showToast('Split amounts must equal the total', 'error'); return;
+    }
     try {
       const sale = {
         customer_id: selectedCustomer?.id || null,
@@ -312,10 +390,34 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
         discount: Math.round(totals.discountAmount * 100) / 100,
         tax: Math.round(totals.taxValue * 100) / 100,
         total: Math.round(totals.total * 100) / 100,
-        payment_method: paymentMethod,
+        payment_method: splitEnabled ? 'split' : paymentMethod,
+        split_cash: splitEnabled ? parseFloat(splitCash) || 0 : undefined,
+        split_card: splitEnabled ? parseFloat(splitCard) || 0 : undefined,
         notes: billNote,
       };
       const result = await api.sales.create(sale);
+      
+      // Check for low stock or out of stock items in the cart
+      cart.forEach(item => {
+        if (!item.isService) {
+          const remainingStock = item.stock - item.qty;
+          if (remainingStock <= 0) {
+            addNotification({
+              title: 'OUT OF STOCK',
+              message: `${item.name} has run out of stock. Immediate reorder required.`,
+              type: 'critical'
+            });
+            showToast(`Critical: ${item.name} is out of stock!`, 'critical');
+          } else if (remainingStock <= 5) {
+            addNotification({
+              title: 'Low Stock Alert',
+              message: `${item.name} is running low (${remainingStock} left).`,
+              type: 'warning'
+            });
+            showToast(`${item.name} stock is low!`, 'warning');
+          }
+        }
+      });
       
       // Prepare for receipt
       setLastSale({
@@ -363,6 +465,15 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
                 <HiOutlineX />
               </button>
             )}
+          </div>
+
+          <div className="pos-clock">
+            <div className="clock-time">
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+            <div className="clock-date">
+              {currentTime.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+            </div>
           </div>
 
           <button className="btn btn-ghost btn-icon" onClick={loadData} title="Refresh Data" 
@@ -719,17 +830,93 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
               </div>
 
               <div className="checkout-payment">
-                <p className="checkout-section-label">Payment Method</p>
-                <div className="payment-methods">
-                  <button className={`payment-method-btn ${paymentMethod === 'cash' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('cash')}>
-                    <HiOutlineCash className="payment-icon" /><span>Cash</span>
-                  </button>
-                  <button className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('card')}>
-                    <HiOutlineCreditCard className="payment-icon" /><span>Card</span>
+                <div className="checkout-payment-header">
+                  <p className="checkout-section-label">Payment Method</p>
+                  <button
+                    className={`split-toggle-btn ${splitEnabled ? 'active' : ''}`}
+                    onClick={() => { setSplitEnabled(v => !v); setSplitCash(''); setSplitCard(''); }}
+                  >
+                    ✂️ Split Payment
                   </button>
                 </div>
+
+                {/* ── #8 Split Payment UI ── */}
+                {splitEnabled ? (
+                  <div className="split-payment-grid">
+                    <div className="split-field">
+                      <label>💵 Cash Amount</label>
+                      <input
+                        className="input"
+                        type="number"
+                        placeholder="0.00"
+                        value={splitCash}
+                        onChange={e => setSplitCash(e.target.value)}
+                        min={0}
+                      />
+                    </div>
+                    <div className="split-field">
+                      <label>💳 Card Amount</label>
+                      <input
+                        className="input"
+                        type="number"
+                        placeholder="0.00"
+                        value={splitCard}
+                        onChange={e => setSplitCard(e.target.value)}
+                        min={0}
+                      />
+                    </div>
+                    <div className={`split-status ${splitValid ? 'ok' : 'err'}`}>
+                      {splitValid
+                        ? `✅ Split confirmed: ${formatPrice((parseFloat(splitCash)||0))} cash + ${formatPrice((parseFloat(splitCard)||0))} card`
+                        : `⚠️ Amounts must equal ${formatPrice(totals.total)}`
+                      }
+                    </div>
+                  </div>
+                ) : (
+                  <div className="payment-methods">
+                    <button className={`payment-method-btn ${paymentMethod === 'cash' ? 'active' : ''}`}
+                      onClick={() => setPaymentMethod('cash')}>
+                      <HiOutlineCash className="payment-icon" /><span>Cash</span>
+                    </button>
+                    <button className={`payment-method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                      onClick={() => setPaymentMethod('card')}>
+                      <HiOutlineCreditCard className="payment-icon" /><span>Card</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* ── #10 Quick Cash Denominations ── */}
+                {paymentMethod === 'cash' && !splitEnabled && (
+                  <div className="quick-cash-section">
+                    <p className="quick-cash-label">Quick Cash</p>
+                    <div className="quick-cash-grid">
+                      {[100, 200, 500, 1000, 2000, 5000].map(denom => (
+                        <button
+                          key={denom}
+                          className={`quick-cash-btn ${parseFloat(cashTendered) === denom ? 'active' : ''}`}
+                          onClick={() => setCashTendered(String(denom))}
+                        >
+                          {denom.toLocaleString()}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="cash-tendered-row">
+                      <input
+                        className="input"
+                        type="number"
+                        placeholder={`Amount tendered (${settings.currency})`}
+                        value={cashTendered}
+                        onChange={e => setCashTendered(e.target.value)}
+                        min={totals.total}
+                      />
+                      {changeDue > 0 && (
+                        <div className="change-due">
+                          Change: <strong>{formatPrice(changeDue)}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="modal-footer">

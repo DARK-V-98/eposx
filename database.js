@@ -43,7 +43,6 @@ async function initialize() {
   db.run('PRAGMA foreign_keys = ON');
 
   createTables();
-  seedSampleData();
   saveDatabase();
 
   // Auto-save interval
@@ -177,8 +176,6 @@ function createTables() {
       db.run('INSERT INTO settings (key, value) VALUES (?, ?)', [k, v]);
     }
   }
-
-  seedSampleData();
 }
 
 // ============================================================
@@ -232,153 +229,6 @@ function execute(sql, params = []) {
 function lastInsertId() {
   const row = queryOne('SELECT last_insert_rowid() as id');
   return row ? row.id : 0;
-}
-
-function seedSampleData() {
-  const count = queryOne('SELECT COUNT(*) as cnt FROM products');
-  if (count && count.cnt > 0) return;
-
-  // Sample Products
-  const products = [
-    ['Shampoo - Premium', 'Hair Care', 15.99, 8.50, 45, 'HC-001', 0],
-    ['Conditioner - Silk', 'Hair Care', 18.99, 10.00, 38, 'HC-002', 0],
-    ['Hair Serum', 'Hair Care', 24.99, 12.00, 25, 'HC-003', 0],
-    ['Hair Gel - Strong Hold', 'Hair Care', 12.99, 6.00, 60, 'HC-004', 0],
-    ['Face Cream - Anti Aging', 'Skin Care', 34.99, 18.00, 20, 'SC-001', 0],
-    ['Sunscreen SPF 50', 'Skin Care', 22.99, 11.00, 35, 'SC-002', 0],
-    ['Face Wash - Gentle', 'Skin Care', 14.99, 7.00, 50, 'SC-003', 0],
-    ['Moisturizer - Daily', 'Skin Care', 19.99, 9.50, 40, 'SC-004', 0],
-    ['Nail Polish Set', 'Nails', 29.99, 14.00, 15, 'NL-001', 0],
-    ['Nail Art Kit', 'Nails', 39.99, 20.00, 10, 'NL-002', 0],
-    ['Makeup Foundation', 'Makeup', 28.99, 14.00, 30, 'MK-001', 0],
-    ['Lipstick Collection', 'Makeup', 19.99, 9.00, 25, 'MK-002', 0],
-    ['Eye Shadow Palette', 'Makeup', 34.99, 17.00, 18, 'MK-003', 0],
-    ['Mascara - Waterproof', 'Makeup', 16.99, 8.00, 42, 'MK-004', 0],
-    ['Perfume - Classic', 'Fragrance', 49.99, 25.00, 12, 'FR-001', 0],
-    ['Body Lotion - Vanilla', 'Body Care', 17.99, 8.50, 30, 'BC-001', 0],
-    ['SD Card 128GB', 'Accessories', 35.00, 15.00, 20, 'PH-001', 0],
-    ['Camera Lens Filter', 'Accessories', 45.00, 22.00, 10, 'PH-002', 0],
-    ['Photo Frame 8x10', 'Decor', 12.00, 5.00, 50, 'PH-003', 0],
-    ['Battery Pack pack LP-E6', 'Accessories', 55.00, 25.00, 8, 'PH-004', 0],
-  ];
-
-  for (const p of products) {
-    execute(
-      'INSERT INTO products (name, category, price, cost, stock, sku, is_service) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      p
-    );
-  }
-
-  // Sample Services
-  const services = [
-    ['Haircut - Basic', 'Hair', 25.00, 30, 'Basic haircut with wash and style'],
-    ['Haircut - Premium', 'Hair', 45.00, 60, 'Premium cut with consultation, wash, and premium styling'],
-    ['Hair Coloring', 'Hair', 85.00, 120, 'Full hair coloring with premium dyes'],
-    ['Highlights', 'Hair', 95.00, 150, 'Partial or full highlights'],
-    ['Hair Treatment', 'Hair', 55.00, 45, 'Deep conditioning and treatment'],
-    ['Facial - Basic', 'Skin', 40.00, 45, 'Basic cleansing facial'],
-    ['Facial - Premium', 'Skin', 75.00, 90, 'Premium facial with advanced treatments'],
-    ['Manicure', 'Nails', 30.00, 45, 'Full manicure with polish'],
-    ['Pedicure', 'Nails', 35.00, 60, 'Full pedicure with polish'],
-    ['Nail Art', 'Nails', 50.00, 75, 'Custom nail art design'],
-    ['Makeup - Bridal', 'Makeup', 150.00, 120, 'Full bridal makeup with trial'],
-    ['Makeup - Event', 'Makeup', 80.00, 60, 'Professional event makeup'],
-    ['Eyebrow Threading', 'Beauty', 15.00, 15, 'Eyebrow threading and shaping'],
-    ['Waxing - Full Body', 'Beauty', 120.00, 90, 'Full body waxing service'],
-    ['Outdoor Photo Shoot', 'Photography', 150.00, 120, '2-hour outdoor photo session'],
-    ['Product Photography', 'Photography', 200.00, 180, 'Professional product shots for catalog'],
-    ['Wedding Highlights', 'Video', 450.00, 240, 'Cinematic wedding highlight video'],
-    ['Passport Photos', 'Studio', 15.00, 10, 'Instant passport size photos'],
-  ];
-
-  for (const s of services) {
-    execute(
-      'INSERT INTO services (name, category, price, duration_minutes, description) VALUES (?, ?, ?, ?, ?)',
-      s
-    );
-  }
-
-  // Sample Customers
-  const customers = [
-    ['Sarah Johnson', '555-0101', 'sarah@email.com', 'Regular customer, prefers organic products', 450.00, 12],
-    ['Emily Davis', '555-0102', 'emily@email.com', 'Allergic to certain dyes', 320.00, 8],
-    ['Jessica Williams', '555-0103', 'jessica@email.com', 'VIP customer', 890.00, 24],
-    ['Amanda Brown', '555-0104', 'amanda@email.com', 'Prefers afternoon appointments', 210.00, 6],
-    ['Michelle Taylor', '555-0105', 'michelle@email.com', 'New customer', 75.00, 2],
-  ];
-
-  for (const c of customers) {
-    execute(
-      'INSERT INTO customers (name, phone, email, notes, total_spent, visit_count) VALUES (?, ?, ?, ?, ?, ?)',
-      c
-    );
-  }
-
-  // Sample Sales (last 30 days)
-  const productPrices = [15.99, 18.99, 24.99, 12.99, 34.99, 22.99, 14.99, 19.99, 29.99, 39.99, 28.99, 19.99, 34.99, 16.99, 49.99, 17.99];
-
-  for (let i = 0; i < 30; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0] + ' ' +
-      String(9 + Math.floor(Math.random() * 9)).padStart(2, '0') + ':' +
-      String(Math.floor(Math.random() * 60)).padStart(2, '0') + ':00';
-
-    const numSales = 1 + Math.floor(Math.random() * 4);
-    for (let j = 0; j < numSales; j++) {
-      const customerId = 1 + Math.floor(Math.random() * 5);
-      const itemCount = 1 + Math.floor(Math.random() * 3);
-      const items = [];
-      let subtotal = 0;
-
-      for (let k = 0; k < itemCount; k++) {
-        const productId = 1 + Math.floor(Math.random() * 16);
-        const qty = 1 + Math.floor(Math.random() * 3);
-        const price = productPrices[productId - 1];
-        items.push({ productId, name: `Product ${productId}`, qty, price });
-        subtotal += price * qty;
-      }
-
-      const discount = Math.random() > 0.7 ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
-      const tax = Math.round((subtotal - discount) * 0.05 * 100) / 100;
-      const total = Math.round((subtotal - discount + tax) * 100) / 100;
-      const method = ['cash', 'card', 'cash', 'card', 'cash'][Math.floor(Math.random() * 5)];
-
-      db.run(
-        'INSERT INTO sales (customer_id, items, subtotal, discount, tax, total, payment_method, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [customerId, JSON.stringify(items), subtotal, discount, tax, total, method, dateStr]
-      );
-    }
-  }
-
-  // Sample Appointments
-  const today = new Date();
-  const custNames = ['Sarah Johnson', 'Emily Davis', 'Jessica Williams', 'Amanda Brown', 'Michelle Taylor'];
-  const svcNames = ['Haircut - Basic', 'Haircut - Premium', 'Hair Coloring', 'Highlights', 'Hair Treatment', 'Facial - Basic', 'Facial - Premium', 'Manicure', 'Pedicure', 'Nail Art', 'Makeup - Bridal', 'Makeup - Event', 'Eyebrow Threading', 'Waxing - Full Body'];
-  const svcPrices = [25, 45, 85, 95, 55, 40, 75, 30, 35, 50, 150, 80, 15, 120];
-  const svcDurations = [30, 60, 120, 150, 45, 45, 90, 45, 60, 75, 120, 60, 15, 90];
-
-  for (let i = -2; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().split('T')[0];
-
-    const numAppts = 1 + Math.floor(Math.random() * 3);
-    for (let j = 0; j < numAppts; j++) {
-      const custId = 1 + Math.floor(Math.random() * 5);
-      const svcId = 1 + Math.floor(Math.random() * 14);
-      const time = `${String(9 + j * 2).padStart(2, '0')}:00`;
-      const status = i < 0 ? 'completed' : i === 0 ? 'confirmed' : 'scheduled';
-
-      db.run(
-        'INSERT INTO appointments (customer_id, customer_name, service_id, service_name, date, time, duration_minutes, price, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [custId, custNames[custId - 1], svcId, svcNames[svcId - 1], dateStr, time, svcDurations[svcId - 1], svcPrices[svcId - 1], status]
-      );
-    }
-  }
-
-  saveDatabase();
-  console.log('[E POS X] Sample data seeded successfully');
 }
 
 // ============================================================
@@ -754,6 +604,20 @@ const dashboardApi = {
   },
 };
 
+const systemApi = {
+  reset() {
+    execute('DELETE FROM sales');
+    execute('DELETE FROM appointments');
+    execute('DELETE FROM products');
+    execute('DELETE FROM services');
+    execute('DELETE FROM customers');
+    execute('DELETE FROM categories');
+    // We keep settings
+    saveDatabase();
+    return { success: true };
+  }
+};
+
 module.exports = {
   initialize,
   products: productsApi,
@@ -763,5 +627,6 @@ module.exports = {
   services: servicesApi,
   categories: categoriesApi,
   dashboard: dashboardApi,
-  settings: settingsApi
+  settings: settingsApi,
+  system: systemApi
 };

@@ -36,7 +36,7 @@ const api = window.api || {
 
 const CHART_COLORS = ['#FF6A00', '#FF8C33', '#FFB366', '#FFD699', '#3B82F6', '#10B981'];
 
-export default function ReportsDashboard({ showToast }) {
+export default function ReportsDashboard({ showToast, settings }) {
   const [stats, setStats] = useState(null);
   const [dailyData, setDailyData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
@@ -165,7 +165,7 @@ export default function ReportsDashboard({ showToast }) {
         <motion.div className="stat-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
           <div className="stat-icon orange"><HiOutlineCurrencyDollar /></div>
           <div className="stat-info">
-            <div className="stat-value">${(stats.todaySales?.total || 0).toFixed(2)}</div>
+            <div className="stat-value">{settings.currency} {(stats.todaySales?.total || 0).toLocaleString()}</div>
             <div className="stat-label">Today's Revenue</div>
           </div>
         </motion.div>
@@ -179,7 +179,7 @@ export default function ReportsDashboard({ showToast }) {
         <motion.div className="stat-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="stat-icon blue"><HiOutlineTrendingUp /></div>
           <div className="stat-info">
-            <div className="stat-value">${(stats.monthSales?.total || 0).toFixed(0)}</div>
+            <div className="stat-value">{settings.currency} {(stats.monthSales?.total || 0).toLocaleString()}</div>
             <div className="stat-label">Monthly Revenue</div>
           </div>
         </motion.div>
@@ -236,7 +236,7 @@ export default function ReportsDashboard({ showToast }) {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                     fontSize: 13,
                   }}
-                  formatter={(value) => [`$${value}`, 'Revenue']}
+                  formatter={(value) => [`${settings.currency} ${value.toLocaleString()}`, 'Revenue']}
                 />
                 <Area
                   type="monotone"
@@ -274,7 +274,7 @@ export default function ReportsDashboard({ showToast }) {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                     fontSize: 13,
                   }}
-                  formatter={(value) => [`$${value}`, 'Revenue']}
+                  formatter={(value) => [`${settings.currency} ${value.toLocaleString()}`, 'Revenue']}
                 />
                 <Bar dataKey="revenue" fill="#FF6A00" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -356,7 +356,7 @@ export default function ReportsDashboard({ showToast }) {
                       boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                       fontSize: 13,
                     }}
-                    formatter={(value) => [`$${value}`]}
+                    formatter={(value) => [`${settings.currency} ${value.toLocaleString()}`]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -409,7 +409,7 @@ export default function ReportsDashboard({ showToast }) {
                       <td><span className="badge badge-neutral">#{sale.id}</span></td>
                       <td>{sale.customer_name || 'Walk-in'}</td>
                       <td>{itemCount} items</td>
-                      <td className="pm-price">${sale.total.toFixed(2)}</td>
+                      <td className="pm-price">{settings.currency} {sale.total.toLocaleString()}</td>
                       <td>
                         <span className={`badge ${sale.payment_method === 'cash' ? 'badge-success' : 'badge-info'}`}>
                           {sale.payment_method}
