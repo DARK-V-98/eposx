@@ -11,9 +11,10 @@ import {
 
 export default function UserManagement({ showToast }) {
   const [users, setUsers] = useState([
-    { id: 1, email: 'tikfese@gmail.com', role: 'Admin', status: 'Active' },
-    { id: 2, email: 'manager@eposx.com', role: 'Manager', status: 'Active' },
-    { id: 3, email: 'cashier1@eposx.com', role: 'Cashier', status: 'Active' },
+    { id: 1, email: 'esystemlk@gmail.com', role: 'Developer', status: 'Active' },
+    { id: 2, email: 'tikfese@gmail.com', role: 'Admin', status: 'Active' },
+    { id: 3, email: 'manager@eposx.com', role: 'Manager', status: 'Active' },
+    { id: 4, email: 'cashier1@eposx.com', role: 'Cashier', status: 'Active' },
   ]);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,7 +78,11 @@ export default function UserManagement({ showToast }) {
                 <tr key={user.id}>
                   <td style={{ fontWeight: 500 }}>{user.email}</td>
                   <td>
-                    <span className={`badge badge-${user.role.toLowerCase() === 'admin' ? 'primary' : user.role.toLowerCase() === 'manager' ? 'info' : 'neutral'}`}>
+                    <span className={`badge badge-${
+                      user.role.toLowerCase() === 'developer' ? 'success' :
+                      user.role.toLowerCase() === 'admin' ? 'primary' :
+                      user.role.toLowerCase() === 'manager' ? 'info' : 'neutral'
+                    }`}>
                       {user.role}
                     </span>
                   </td>
@@ -95,7 +100,7 @@ export default function UserManagement({ showToast }) {
                         className="btn btn-icon btn-ghost btn-danger" 
                         title="Delete"
                         onClick={() => deleteUser(user.id)}
-                        disabled={user.email === 'tikfese@gmail.com'}
+                        disabled={user.email === 'tikfese@gmail.com' || user.email === 'esystemlk@gmail.com'}
                       >
                         <HiOutlineTrash />
                       </button>
@@ -169,6 +174,7 @@ export default function UserManagement({ showToast }) {
                       <option value="Cashier">Cashier</option>
                       <option value="Manager">Manager</option>
                       <option value="Admin">Admin</option>
+                      <option value="Developer">Developer</option>
                     </select>
                   </div>
                 </div>

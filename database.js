@@ -1,14 +1,27 @@
 const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
-const { app } = require('electron');
+
+// Electron is optional — when running inside the server there is no electron.
+let app = null;
+try {
+  app = require('electron').app || null;
+} catch (_) {
+  app = null;
+}
 
 let db;
 let dbPath;
 
 function getDbPath() {
-  const userDataPath = app.getPath('userData');
-  return path.join(userDataPath, 'eposx.db');
+  // 1) Explicit override (used by the standalone server)
+  if (process.env.EPOSX_DB_PATH) return process.env.EPOSX_DB_PATH;
+  // 2) Electron app userData dir
+  if (app && typeof app.getPath === 'function') {
+    return path.join(app.getPath('userData'), 'eposx.db');
+  }
+  // 3) Fallback: alongside the process cwd
+  return path.join(process.cwd(), 'eposx.db');
 }
 
 function saveDatabase() {
@@ -48,11 +61,19 @@ async function initialize() {
   // Auto-save interval
   saveInterval = setInterval(saveDatabase, 30000);
 
-  // Save on app quit
-  app.on('before-quit', () => {
-    clearInterval(saveInterval);
-    saveDatabase();
-  });
+  // Save on app quit (Electron only)
+  if (app && typeof app.on === 'function') {
+    app.on('before-quit', () => {
+      clearInterval(saveInterval);
+      saveDatabase();
+    });
+  } else {
+    // Standalone server: flush on process exit signals
+    const flush = () => { try { clearInterval(saveInterval); saveDatabase(); } catch (_) {} };
+    process.on('SIGINT', () => { flush(); process.exit(0); });
+    process.on('SIGTERM', () => { flush(); process.exit(0); });
+    process.on('exit', flush);
+  }
 }
 
 function createTables() {

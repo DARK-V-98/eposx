@@ -7,6 +7,8 @@ import {
   HiOutlineOfficeBuilding,
   HiOutlineBriefcase
 } from 'react-icons/hi';
+import { FcGoogle } from 'react-icons/fc';
+import { signInWithGoogle } from '../firebase';
 import './Login.css';
 
 const loadingSteps = [
@@ -74,7 +76,7 @@ function Particle({ index }) {
   );
 }
 
-export default function Login({ onLogin, bgImage, logo }) {
+export default function Login({ onLogin, onGoogleSignedIn, bgImage, logo }) {
   const [username, setUsername] = useState('tikfese@gmail.com');
   const [password, setPassword] = useState('200377');
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +86,31 @@ export default function Login({ onLogin, bgImage, logo }) {
   const [userFocused, setUserFocused] = useState(false);
   const [passFocused, setPassFocused] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
   const cardRef = useRef(null);
+
+  const handleGoogle = async () => {
+    setAuthError('');
+    setGoogleBusy(true);
+    try {
+      const result = await signInWithGoogle();
+      // onAuthStateChanged in App.jsx flips the logged-in state; this is
+      // just for the welcome toast.
+      onGoogleSignedIn?.(result.user);
+    } catch (err) {
+      console.error('[E POS X] Google sign-in failed:', err);
+      const code = err?.code || '';
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setAuthError('Sign-in cancelled.');
+      } else if (code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized in Firebase Auth settings.');
+      } else {
+        setAuthError(err?.message || 'Google sign-in failed.');
+      }
+      setGoogleBusy(false);
+    }
+  };
 
   // Mouse-tilt effect on card
   const rotateX = useMotionValue(0);
@@ -347,6 +373,27 @@ export default function Login({ onLogin, bgImage, logo }) {
                 <span className="btn-arrow">→</span>
               </span>
             </motion.button>
+
+            {/* Divider */}
+            <div className="login-divider"><span>or</span></div>
+
+            {/* Google Sign-In */}
+            <motion.button
+              type="button"
+              className="google-button"
+              onClick={handleGoogle}
+              disabled={googleBusy}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              whileHover={{ scale: googleBusy ? 1 : 1.02, y: googleBusy ? 0 : -2 }}
+              whileTap={{ scale: googleBusy ? 1 : 0.97 }}
+            >
+              <FcGoogle size={22} />
+              <span>{googleBusy ? 'Connecting to Google…' : 'Continue with Google'}</span>
+            </motion.button>
+
+            {authError && <p className="login-auth-error">{authError}</p>}
           </form>
 
           <motion.p

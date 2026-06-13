@@ -21,6 +21,8 @@ import Breadcrumb from './components/Breadcrumb';
 import loginBg from './assets/login-bg.png';
 import logo from './assets/logo.png';
 import hardwareHub from './services/hardwareService';
+import { onAuthStateChanged, signOut as fbSignOut, initAnalyticsIfSupported } from './firebase';
+import { resolveRole } from './auth/roles';
 
 const pages = {
   pos:       POSScreen,
@@ -53,6 +55,7 @@ const KEY_NAV = {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn]           = useState(false);
   const [userRole, setUserRole]               = useState('User');
+  const [currentUser, setCurrentUser]         = useState(null);
   const [activePage, setActivePage]           = useState('pos');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toasts, setToasts]                   = useState([]);
@@ -142,16 +145,50 @@ export default function App() {
   }, []);
 
   // ── Auth ──────────────────────────────────────────────────
+  // Restore the Firebase session on load and react to sign in/out.
+  useEffect(() => {
+    initAnalyticsIfSupported();
+    const unsub = onAuthStateChanged((user) => {
+      if (user) {
+        const role = resolveRole(user.email);
+        setCurrentUser({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+          photo: user.photoURL,
+        });
+        setUserRole(role);
+        setIsLoggedIn(true);
+      } else {
+        setCurrentUser(null);
+        setUserRole('User');
+        setIsLoggedIn(false);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Real Google sign-in flips state via the onAuthStateChanged listener above.
+  // This handler covers the email/password dev bypass form.
   const handleLogin = (credentials) => {
+    const email = credentials?.username;
+    setCurrentUser({ email, name: email, photo: null });
+    setUserRole(resolveRole(email));
     setIsLoggedIn(true);
-    setUserRole(credentials?.username === 'tikfese@gmail.com' ? 'Admin' : 'Cashier');
     showToast('Login successful! Welcome to EPOSX.', 'success');
   };
 
-  const handleLogout = useCallback(() => {
+  // Called by <Login> right after Google auth resolves (toast only).
+  const handleGoogleSignedIn = (user) => {
+    showToast(`Welcome ${user?.displayName || user?.email}`, 'success');
+  };
+
+  const handleLogout = useCallback(async () => {
     console.log('[E POS X] Logging out...');
+    try { await fbSignOut(); } catch (_) {}
     setIsLoggedIn(false);
     setUserRole('User');
+    setCurrentUser(null);
     setActivePage('pos');
     showToast('Logged out successfully.', 'info');
   }, [showToast]);
@@ -182,7 +219,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Login onLogin={handleLogin} bgImage={loginBg} logo={logo} />
+            <Login onLogin={handleLogin} onGoogleSignedIn={handleGoogleSignedIn} bgImage={loginBg} logo={logo} />
           </motion.div>
         ) : (
           <motion.div

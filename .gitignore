@@ -1,1 +1,9 @@
 node_modules
+dist
+release
+server/data
+*.db
+*.bak
+.env
+android
+ios
