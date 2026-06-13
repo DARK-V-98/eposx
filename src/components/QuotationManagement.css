@@ -1,0 +1,47 @@
+.quote-page { padding: 24px; }
+.muted-inline { color: var(--text-secondary, #9ca3af); font-size: 12px; }
+
+.quote-modal { max-width: 860px; width: 95%; }
+
+.quote-builder {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 18px;
+  padding: 4px;
+}
+
+.qb-search {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border-color, rgba(0,0,0,0.12));
+  border-radius: 10px; padding: 0 12px; color: var(--text-secondary, #6b7280);
+  margin-bottom: 10px;
+}
+.qb-search input { flex: 1; border: none; outline: none; background: transparent; padding: 10px 0; }
+
+.qb-catalog-list { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.qb-cat-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+  border-radius: 8px; background: var(--bg-secondary, #f9fafb);
+  cursor: pointer; font-size: 14px; text-align: left;
+}
+.qb-cat-item:hover { border-color: var(--primary, #ff6a00); }
+.qb-svc { font-style: normal; font-size: 11px; color: #2563eb; background: #dbeafe; padding: 1px 6px; border-radius: 6px; margin-left: 6px; }
+
+.qb-meta { display: flex; gap: 10px; margin-bottom: 10px; }
+.qb-meta .input { flex: 1; }
+
+.qb-cart-list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.qb-cart-row { display: grid; grid-template-columns: 1fr 70px 90px 40px; align-items: center; gap: 8px; }
+.qb-cart-name { font-size: 14px; font-weight: 500; }
+.qb-qty { text-align: center; padding: 6px; }
+.qb-line { text-align: right; font-size: 14px; }
+
+.qb-totals { margin-top: 12px; border-top: 1px solid var(--border-color, rgba(0,0,0,0.1)); padding-top: 10px; }
+.qb-trow { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
+.qb-disc, .qb-grand input { width: 90px; text-align: right; padding: 6px; }
+.qb-grand { font-weight: 700; font-size: 16px; border-top: 2px solid var(--text-primary, #111); margin-top: 6px; padding-top: 8px; }
+
+@media (max-width: 720px) {
+  .quote-builder { grid-template-columns: 1fr; }
+}

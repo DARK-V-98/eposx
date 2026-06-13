@@ -9,6 +9,12 @@ import StudioBooking from './components/StudioBooking';
 import ReportsDashboard from './components/ReportsDashboard';
 import SettingsManagement from './components/SettingsManagement';
 import UserManagement from './components/UserManagement';
+import ReturnsManagement from './components/ReturnsManagement';
+import QuotationManagement from './components/QuotationManagement';
+import ExpenseManagement from './components/ExpenseManagement';
+import CashDrawer from './components/CashDrawer';
+import DuesManagement from './components/DuesManagement';
+import CouponsManagement from './components/CouponsManagement';
 import SupplierManagement from './components/SupplierManagement';
 import StockAlerts from './components/StockAlerts';
 import StaffManagement from './components/StaffManagement';
@@ -32,6 +38,12 @@ const pages = {
   customers: CustomerManagement,
   staff:     StaffManagement,
   history:   OrderHistory,
+  quotations: QuotationManagement,
+  returns:   ReturnsManagement,
+  expenses:  ExpenseManagement,
+  cash:      CashDrawer,
+  dues:      DuesManagement,
+  coupons:   CouponsManagement,
   studio:    StudioBooking,
   reports:   ReportsDashboard,
   users:     UserManagement,

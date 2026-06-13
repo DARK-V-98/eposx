@@ -50,6 +50,20 @@ app.get('/api/sales/daily-summary', (req, res) => ok(res, () => db.sales.getDail
 app.get('/api/sales/monthly-summary', (req, res) => ok(res, () => db.sales.getMonthlySummary(Number(req.query.months) || 12)));
 app.post('/api/sales', (req, res) => ok(res, () => db.sales.create(req.body)));
 
+// ---------------- Returns ----------------
+app.get('/api/returns', (req, res) => ok(res, () => db.returns.getAll()));
+app.get('/api/returns/invoice/:id', (req, res) => ok(res, () => db.returns.getInvoice(Number(req.params.id))));
+app.get('/api/returns/sale/:id', (req, res) => ok(res, () => db.returns.getBySale(Number(req.params.id))));
+app.post('/api/returns', (req, res) => ok(res, () => db.returns.create(req.body)));
+
+// ---------------- Quotations ----------------
+app.get('/api/quotations', (req, res) => ok(res, () => db.quotations.getAll()));
+app.get('/api/quotations/:id', (req, res) => ok(res, () => db.quotations.getById(Number(req.params.id))));
+app.post('/api/quotations', (req, res) => ok(res, () => db.quotations.create(req.body)));
+app.put('/api/quotations/:id', (req, res) => ok(res, () => db.quotations.update(Number(req.params.id), req.body)));
+app.delete('/api/quotations/:id', (req, res) => ok(res, () => db.quotations.delete(Number(req.params.id))));
+app.post('/api/quotations/:id/convert', (req, res) => ok(res, () => db.quotations.convertToInvoice(Number(req.params.id), req.body || {})));
+
 // ---------------- Categories ----------------
 app.get('/api/categories', (req, res) => ok(res, () => db.categories.getAll(req.query.type)));
 app.get('/api/categories/tree', (req, res) => ok(res, () => db.categories.getTree(req.query.type)));
@@ -80,8 +94,35 @@ app.post('/api/services', (req, res) => ok(res, () => db.services.create(req.bod
 app.put('/api/services/:id', (req, res) => ok(res, () => db.services.update(Number(req.params.id), req.body)));
 app.delete('/api/services/:id', (req, res) => ok(res, () => db.services.delete(Number(req.params.id))));
 
+// ---------------- Expenses ----------------
+app.get('/api/expenses', (req, res) => ok(res, () => db.expenses.getAll()));
+app.get('/api/expenses/summary', (req, res) => ok(res, () => db.expenses.getSummary(req.query.start, req.query.end)));
+app.post('/api/expenses', (req, res) => ok(res, () => db.expenses.create(req.body)));
+app.put('/api/expenses/:id', (req, res) => ok(res, () => db.expenses.update(Number(req.params.id), req.body)));
+app.delete('/api/expenses/:id', (req, res) => ok(res, () => db.expenses.delete(Number(req.params.id))));
+
+// ---------------- Cash Drawer ----------------
+app.get('/api/cash/current', (req, res) => ok(res, () => db.cash.getCurrent()));
+app.get('/api/cash/history', (req, res) => ok(res, () => db.cash.getAll()));
+app.post('/api/cash/open', (req, res) => ok(res, () => db.cash.open(req.body)));
+app.post('/api/cash/close', (req, res) => ok(res, () => db.cash.close(req.body)));
+
+// ---------------- Customer Dues ----------------
+app.get('/api/dues', (req, res) => ok(res, () => db.dues.getCustomersWithDue()));
+app.get('/api/dues/customer/:id', (req, res) => ok(res, () => db.dues.getCustomerDues(Number(req.params.id))));
+app.get('/api/dues/payments/:id', (req, res) => ok(res, () => db.dues.getPayments(Number(req.params.id))));
+app.post('/api/dues/settle', (req, res) => ok(res, () => db.dues.settle(req.body)));
+
+// ---------------- Coupons ----------------
+app.get('/api/coupons', (req, res) => ok(res, () => db.coupons.getAll()));
+app.post('/api/coupons', (req, res) => ok(res, () => db.coupons.create(req.body)));
+app.put('/api/coupons/:id', (req, res) => ok(res, () => db.coupons.update(Number(req.params.id), req.body)));
+app.delete('/api/coupons/:id', (req, res) => ok(res, () => db.coupons.delete(Number(req.params.id))));
+app.get('/api/coupons/validate', (req, res) => ok(res, () => db.coupons.validate(req.query.code, Number(req.query.subtotal) || 0)));
+
 // ---------------- Dashboard ----------------
 app.get('/api/dashboard/stats', (req, res) => ok(res, () => db.dashboard.getStats()));
+app.get('/api/dashboard/profit-loss', (req, res) => ok(res, () => db.dashboard.getProfitLoss(req.query.start, req.query.end)));
 
 // ---------------- Settings ----------------
 app.get('/api/settings', (req, res) => ok(res, () => db.settings.getAll()));

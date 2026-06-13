@@ -18,6 +18,12 @@ import {
   HiOutlineTruck,
   HiOutlineBell,
   HiOutlineTrendingUp,
+  HiOutlineReceiptRefund,
+  HiOutlineDocumentText,
+  HiOutlineCash,
+  HiOutlineCreditCard,
+  HiOutlineTicket,
+  HiOutlineCalculator,
 } from 'react-icons/hi';
 import './Sidebar.css';
 
@@ -29,6 +35,12 @@ const navItems = [
   { id: 'customers', label: 'Customers',            icon: HiOutlineUsers },
   { id: 'staff',     label: 'Staff Performance',    icon: HiOutlineTrendingUp },
   { id: 'history',   label: 'Order History',        icon: HiOutlineClipboardList },
+  { id: 'quotations',label: 'Quotations',           icon: HiOutlineDocumentText },
+  { id: 'returns',   label: 'Returns & Refunds',    icon: HiOutlineReceiptRefund },
+  { id: 'dues',      label: 'Credit & Dues',        icon: HiOutlineCreditCard },
+  { id: 'expenses',  label: 'Expenses & P/L',       icon: HiOutlineCalculator },
+  { id: 'cash',      label: 'Cash Drawer',          icon: HiOutlineCash },
+  { id: 'coupons',   label: 'Coupons',              icon: HiOutlineTicket },
   { id: 'reports',   label: 'Reports',              icon: HiOutlinePresentationChartBar },
   { id: 'users',     label: 'User Management',      icon: HiOutlineUserGroup, adminOnly: true },
   { id: 'settings',  label: 'Settings',             icon: HiOutlineCog },
@@ -58,7 +70,7 @@ export default function Sidebar({
     try { api.shell.openExternal('https://www.esystemlk.com'); } catch (_) {}
   }
 
-  const visibleItems = navItems.filter(item => !item.adminOnly || userRole === 'Admin');
+  const visibleItems = navItems.filter(item => !item.adminOnly || userRole === 'Admin' || userRole === 'Developer');
 
   return (
     <motion.aside

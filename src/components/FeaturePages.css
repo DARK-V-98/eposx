@@ -1,0 +1,49 @@
+/* Shared styles for Expenses, Cash Drawer, Dues, Coupons pages */
+.feature-page { padding: 24px; }
+.feature-muted { color: var(--text-secondary, #9ca3af); font-size: 12px; }
+
+/* KPI / stat cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, rgba(0,0,0,0.06));
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.kpi-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary, #9ca3af); }
+.kpi-value { font-size: 24px; font-weight: 700; margin-top: 6px; }
+.kpi-value.pos { color: #16a34a; }
+.kpi-value.neg { color: #dc2626; }
+
+.feature-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.feature-filters { display: flex; gap: 8px; align-items: center; }
+
+.amount-pos { color: #16a34a; font-weight: 600; }
+.amount-neg { color: #dc2626; font-weight: 600; }
+
+/* Cash drawer */
+.cash-status-card {
+  display: flex; flex-wrap: wrap; gap: 28px; align-items: center;
+  padding: 22px; margin-bottom: 18px;
+}
+.cash-open-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.cash-open-dot.open { background: #16a34a; box-shadow: 0 0 8px #16a34a; }
+.cash-open-dot.closed { background: #9ca3af; }
+
+.z-report {
+  max-width: 380px;
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--bg-secondary, #f9fafb);
+}
+.z-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+.z-row.total { border-top: 2px solid var(--text-primary, #111); margin-top: 6px; padding-top: 10px; font-weight: 700; }
+
+.settle-input { width: 130px; text-align: right; }

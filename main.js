@@ -147,6 +147,26 @@ ipcMain.handle('sales:getByDateRange', (_, startDate, endDate) => {
 });
 
 // ============================================================
+// IPC HANDLERS — Returns
+// ============================================================
+
+ipcMain.handle('returns:getAll', () => db.returns.getAll());
+ipcMain.handle('returns:getInvoice', (_, id) => db.returns.getInvoice(id));
+ipcMain.handle('returns:getBySale', (_, id) => db.returns.getBySale(id));
+ipcMain.handle('returns:create', (_, req) => db.returns.create(req));
+
+// ============================================================
+// IPC HANDLERS — Quotations
+// ============================================================
+
+ipcMain.handle('quotations:getAll', () => db.quotations.getAll());
+ipcMain.handle('quotations:getById', (_, id) => db.quotations.getById(id));
+ipcMain.handle('quotations:create', (_, q) => db.quotations.create(q));
+ipcMain.handle('quotations:update', (_, id, q) => db.quotations.update(id, q));
+ipcMain.handle('quotations:delete', (_, id) => db.quotations.delete(id));
+ipcMain.handle('quotations:convert', (_, id, opts) => db.quotations.convertToInvoice(id, opts));
+
+// ============================================================
 // IPC HANDLERS — Categories
 // ============================================================
 
@@ -259,12 +279,48 @@ ipcMain.handle('services:delete', (_, id) => {
 });
 
 // ============================================================
+// IPC HANDLERS — Expenses
+// ============================================================
+ipcMain.handle('expenses:getAll', () => db.expenses.getAll());
+ipcMain.handle('expenses:getSummary', (_, start, end) => db.expenses.getSummary(start, end));
+ipcMain.handle('expenses:create', (_, e) => db.expenses.create(e));
+ipcMain.handle('expenses:update', (_, id, e) => db.expenses.update(id, e));
+ipcMain.handle('expenses:delete', (_, id) => db.expenses.delete(id));
+
+// ============================================================
+// IPC HANDLERS — Cash Drawer
+// ============================================================
+ipcMain.handle('cash:getCurrent', () => db.cash.getCurrent());
+ipcMain.handle('cash:getAll', () => db.cash.getAll());
+ipcMain.handle('cash:open', (_, data) => db.cash.open(data));
+ipcMain.handle('cash:close', (_, data) => db.cash.close(data));
+
+// ============================================================
+// IPC HANDLERS — Customer Dues
+// ============================================================
+ipcMain.handle('dues:getCustomersWithDue', () => db.dues.getCustomersWithDue());
+ipcMain.handle('dues:getCustomerDues', (_, id) => db.dues.getCustomerDues(id));
+ipcMain.handle('dues:getPayments', (_, id) => db.dues.getPayments(id));
+ipcMain.handle('dues:settle', (_, data) => db.dues.settle(data));
+
+// ============================================================
+// IPC HANDLERS — Coupons
+// ============================================================
+ipcMain.handle('coupons:getAll', () => db.coupons.getAll());
+ipcMain.handle('coupons:create', (_, c) => db.coupons.create(c));
+ipcMain.handle('coupons:update', (_, id, c) => db.coupons.update(id, c));
+ipcMain.handle('coupons:delete', (_, id) => db.coupons.delete(id));
+ipcMain.handle('coupons:validate', (_, code, subtotal) => db.coupons.validate(code, subtotal));
+
+// ============================================================
 // IPC HANDLERS — Dashboard Stats
 // ============================================================
 
 ipcMain.handle('dashboard:getStats', () => {
   return db.dashboard.getStats();
 });
+
+ipcMain.handle('dashboard:getProfitLoss', (_, start, end) => db.dashboard.getProfitLoss(start, end));
 
 // ============================================================
 // IPC HANDLERS — Settings

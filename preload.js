@@ -22,6 +22,24 @@ contextBridge.exposeInMainWorld('api', {
     getMonthlySummary: (months) => ipcRenderer.invoke('sales:getMonthlySummary', months),
   },
 
+  // Returns
+  returns: {
+    getAll: () => ipcRenderer.invoke('returns:getAll'),
+    getInvoice: (id) => ipcRenderer.invoke('returns:getInvoice', id),
+    getBySale: (id) => ipcRenderer.invoke('returns:getBySale', id),
+    create: (req) => ipcRenderer.invoke('returns:create', req),
+  },
+
+  // Quotations
+  quotations: {
+    getAll: () => ipcRenderer.invoke('quotations:getAll'),
+    getById: (id) => ipcRenderer.invoke('quotations:getById', id),
+    create: (q) => ipcRenderer.invoke('quotations:create', q),
+    update: (id, q) => ipcRenderer.invoke('quotations:update', id, q),
+    delete: (id) => ipcRenderer.invoke('quotations:delete', id),
+    convertToInvoice: (id, opts) => ipcRenderer.invoke('quotations:convert', id, opts),
+  },
+
   // Customers
   customers: {
     getAll: () => ipcRenderer.invoke('customers:getAll'),
@@ -51,9 +69,44 @@ contextBridge.exposeInMainWorld('api', {
     delete: (id) => ipcRenderer.invoke('services:delete', id),
   },
 
+  // Expenses
+  expenses: {
+    getAll: () => ipcRenderer.invoke('expenses:getAll'),
+    getSummary: (start, end) => ipcRenderer.invoke('expenses:getSummary', start, end),
+    create: (e) => ipcRenderer.invoke('expenses:create', e),
+    update: (id, e) => ipcRenderer.invoke('expenses:update', id, e),
+    delete: (id) => ipcRenderer.invoke('expenses:delete', id),
+  },
+
+  // Cash Drawer
+  cash: {
+    getCurrent: () => ipcRenderer.invoke('cash:getCurrent'),
+    getAll: () => ipcRenderer.invoke('cash:getAll'),
+    open: (data) => ipcRenderer.invoke('cash:open', data),
+    close: (data) => ipcRenderer.invoke('cash:close', data),
+  },
+
+  // Customer Dues
+  dues: {
+    getCustomersWithDue: () => ipcRenderer.invoke('dues:getCustomersWithDue'),
+    getCustomerDues: (id) => ipcRenderer.invoke('dues:getCustomerDues', id),
+    getPayments: (id) => ipcRenderer.invoke('dues:getPayments', id),
+    settle: (data) => ipcRenderer.invoke('dues:settle', data),
+  },
+
+  // Coupons
+  coupons: {
+    getAll: () => ipcRenderer.invoke('coupons:getAll'),
+    create: (c) => ipcRenderer.invoke('coupons:create', c),
+    update: (id, c) => ipcRenderer.invoke('coupons:update', id, c),
+    delete: (id) => ipcRenderer.invoke('coupons:delete', id),
+    validate: (code, subtotal) => ipcRenderer.invoke('coupons:validate', code, subtotal),
+  },
+
   // Dashboard
   dashboard: {
     getStats: () => ipcRenderer.invoke('dashboard:getStats'),
+    getProfitLoss: (start, end) => ipcRenderer.invoke('dashboard:getProfitLoss', start, end),
   },
 
   // Settings

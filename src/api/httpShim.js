@@ -79,6 +79,22 @@ export function createHttpApi() {
       getMonthlySummary: (months) => get(`/api/sales/monthly-summary${qs({ months })}`),
     },
 
+    returns: {
+      getAll: () => get('/api/returns'),
+      getInvoice: (id) => get(`/api/returns/invoice/${id}`),
+      getBySale: (id) => get(`/api/returns/sale/${id}`),
+      create: (req) => post('/api/returns', req),
+    },
+
+    quotations: {
+      getAll: () => get('/api/quotations'),
+      getById: (id) => get(`/api/quotations/${id}`),
+      create: (q) => post('/api/quotations', q),
+      update: (id, q) => put(`/api/quotations/${id}`, q),
+      delete: (id) => del(`/api/quotations/${id}`),
+      convertToInvoice: (id, opts) => post(`/api/quotations/${id}/convert`, opts || {}),
+    },
+
     customers: {
       getAll: () => get('/api/customers'),
       getById: (id) => get(`/api/customers/${id}`),
@@ -113,8 +129,39 @@ export function createHttpApi() {
       delete: (id) => del(`/api/categories/${id}`),
     },
 
+    expenses: {
+      getAll: () => get('/api/expenses'),
+      getSummary: (start, end) => get(`/api/expenses/summary${qs({ start, end })}`),
+      create: (e) => post('/api/expenses', e),
+      update: (id, e) => put(`/api/expenses/${id}`, e),
+      delete: (id) => del(`/api/expenses/${id}`),
+    },
+
+    cash: {
+      getCurrent: () => get('/api/cash/current'),
+      getAll: () => get('/api/cash/history'),
+      open: (data) => post('/api/cash/open', data),
+      close: (data) => post('/api/cash/close', data),
+    },
+
+    dues: {
+      getCustomersWithDue: () => get('/api/dues'),
+      getCustomerDues: (id) => get(`/api/dues/customer/${id}`),
+      getPayments: (id) => get(`/api/dues/payments/${id}`),
+      settle: (data) => post('/api/dues/settle', data),
+    },
+
+    coupons: {
+      getAll: () => get('/api/coupons'),
+      create: (c) => post('/api/coupons', c),
+      update: (id, c) => put(`/api/coupons/${id}`, c),
+      delete: (id) => del(`/api/coupons/${id}`),
+      validate: (code, subtotal) => get(`/api/coupons/validate${qs({ code, subtotal })}`),
+    },
+
     dashboard: {
       getStats: () => get('/api/dashboard/stats'),
+      getProfitLoss: (start, end) => get(`/api/dashboard/profit-loss${qs({ start, end })}`),
     },
 
     settings: {
