@@ -34,10 +34,23 @@ add admins, update **both** places.
 4. On trial expiry the store flips to **expired** → user is locked out and shown a
    **Purchase E POS X** screen until the admin activates a paid term.
 
+## Data backends
+- **Offline package** → local SQLite (Electron) / the bundled HTTP server. No POS
+  data in Firestore; still uses Firebase for login + licensing.
+- **Cloud package** → all POS data lives in Firestore under
+  `stores/{storeId}/<collection>` (`products`, `sales`, `customers`, `categories`,
+  `services`, `appointments`, `quotations`, `returns`, `expenses`, `coupons`,
+  `payments`, `cash_sessions`), plus `meta/settings` and `meta/counters`
+  (sequential invoice numbers). Product images go to Firebase **Storage**.
+- Switching is automatic: on login the app reads the store's `package` and points
+  `window.api` at the Firestore backend (cloud) or the SQLite backend (offline) —
+  the same React components work against either, unchanged.
+
 ## Notes
 - The Firebase `apiKey` in `src/firebase.js` is a public client identifier (safe to
   ship); access is controlled by the rules above.
-- **Offline package** uses the local SQLite app and does not require Firestore for
-  its POS data — but still uses Firebase for login + licensing.
-- Porting the full Cloud-package POS data (products, sales, etc.) into Firestore is
-  the next phase; the rules already reserve `stores/{storeId}/**` for it.
+- Cloud data sync is real-time-capable and multi-device; the Firestore security
+  rules restrict each store's data to its owner (and the platform admin).
+- The Cloud package runs on **web + mobile**. On packaged desktop Electron the
+  data backend stays local (offline package), since the renderer's `window.api`
+  bridge can't be swapped at runtime.

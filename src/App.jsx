@@ -32,6 +32,21 @@ import { resolveRole, isPlatformAdmin } from './auth/roles';
 import { getActiveStore, requestAccess, effectiveStatus, daysLeft } from './services/licenseService';
 import { PackageSelection, StatusScreen } from './components/AccessScreens';
 import AdminPanel from './components/AdminPanel';
+import { createFirestoreApi } from './api/firestoreApi';
+import { startRealtime, stopRealtime } from './api/realtime';
+
+// Point window.api at Firestore for a cloud store, or back to the default
+// (SQLite via HTTP/Electron) for offline stores.
+function applyBackendForStore(store) {
+  const router = window.__apiRouter;
+  if (store && store.package === 'cloud') {
+    startRealtime(store.id);                       // live cache + change events
+    router?.__setBackend?.(createFirestoreApi(store.id));
+  } else {
+    stopRealtime();
+    router?.__resetBackend?.();
+  }
+}
 
 const pages = {
   pos:       POSScreen,
@@ -202,7 +217,10 @@ export default function App() {
       const store = await getActiveStore(user.uid);
       if (!store) { setCurrentStore(null); setAccessState('need-store'); return; }
       setCurrentStore(store);
-      setAccessState(effectiveStatus(store)); // pending|trial|active|expired|locked|rejected
+      const status = effectiveStatus(store);
+      // Swap to the Firestore backend before the app renders for cloud stores.
+      if (status === 'active' || status === 'trial') applyBackendForStore(store);
+      setAccessState(status); // pending|trial|active|expired|locked|rejected
     } catch (err) {
       console.error('[E POS X] Access check failed:', err);
       // Fail safe: let them see the request screen rather than a blank app.
@@ -241,6 +259,7 @@ export default function App() {
 
   const handleLogout = useCallback(async () => {
     console.log('[E POS X] Logging out...');
+    try { stopRealtime(); window.__apiRouter?.__resetBackend?.(); } catch (_) {}
     try { await fbSignOut(); } catch (_) {}
     setIsLoggedIn(false);
     setUserRole('User');

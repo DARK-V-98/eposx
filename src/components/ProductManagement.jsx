@@ -76,7 +76,7 @@ export default function ProductManagement({ showToast, currentStore }) {
   const fileInputRef = useRef(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   // Web/cloud build uses Firebase Storage; offline Electron uses native picker.
-  const isWebMode = typeof window !== 'undefined' && window.api?.__mode === 'http';
+  const isWebMode = typeof window !== 'undefined' && ['http', 'cloud'].includes(window.api?.__mode);
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'services' | 'categories'
   const [settings, setSettings] = useState({ currency: 'LKR' });
 
