@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlinePlus, HiOutlineTrash, HiOutlineCash, HiOutlineX } from 'react-icons/hi';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import './FeaturePages.css';
 
 const api = window.api || {
@@ -19,6 +20,7 @@ export default function ExpenseManagement({ showToast }) {
   const [form, setForm] = useState({ category: 'General', description: '', amount: '', payment_method: 'cash', date: new Date().toISOString().split('T')[0] });
 
   useEffect(() => { load(); }, []);
+  useLiveRefresh(load);
 
   async function load() {
     try {

@@ -77,8 +77,8 @@ function Particle({ index }) {
 }
 
 export default function Login({ onLogin, onGoogleSignedIn, bgImage, logo }) {
-  const [username, setUsername] = useState('tikfese@gmail.com');
-  const [password, setPassword] = useState('200377');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [progress, setProgress] = useState(0);

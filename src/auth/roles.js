@@ -17,8 +17,6 @@ export const DEFAULT_ROLE = 'Cashier';
 export const ROLE_MAP = {
   // esystemlk developer account — full Developer access by default.
   'esystemlk@gmail.com': 'Developer',
-  // existing system owner
-  'tikfese@gmail.com': 'Admin',
 };
 
 // Platform admins — these accounts manage licensing/access for ALL stores

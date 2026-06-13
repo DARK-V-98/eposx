@@ -93,6 +93,7 @@ export default function App() {
   const [isAdmin, setIsAdmin]                 = useState(false);
   const [activePage, setActivePage]           = useState('pos');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen]       = useState(false);
   const [toasts, setToasts]                   = useState([]);
 
   // ── #1 Dark Mode ──────────────────────────────────────────
@@ -283,7 +284,8 @@ export default function App() {
         darkMode={darkMode}
         onToggleDark={() => setDarkMode(v => !v)}
         onOpenSpotlight={() => isLoggedIn && setSpotlightOpen(true)}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isLoggedIn && showApp}
+        onToggleMobileNav={() => setMobileNavOpen(v => !v)}
       />
 
       <AnimatePresence mode="wait">
@@ -317,12 +319,18 @@ export default function App() {
           >
             <div className="app-body">
               {/* ── #2/#3 Sidebar with keyboard hint tooltip ── */}
+              {/* Mobile drawer overlay */}
+              {mobileNavOpen && (
+                <div className="mobile-nav-overlay" onClick={() => setMobileNavOpen(false)} />
+              )}
+
               <Sidebar
                 logo={logo}
                 activePage={activePage}
-                onNavigate={setActivePage}
+                onNavigate={(p) => { setActivePage(p); setMobileNavOpen(false); }}
                 collapsed={sidebarCollapsed}
                 onToggleCollapse={() => setSidebarCollapsed(v => !v)}
+                mobileOpen={mobileNavOpen}
                 parkedCount={parkedBills.length}
                 userRole={userRole}
                 isPlatformAdmin={isAdmin}

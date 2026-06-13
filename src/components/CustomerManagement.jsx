@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import {
   HiOutlinePlus,
   HiOutlinePencil,
@@ -43,6 +44,7 @@ export default function CustomerManagement({ showToast }) {
   const [history, setHistory] = useState([]);
 
   useEffect(() => { loadCustomers(); loadSettings(); }, []);
+  useLiveRefresh(loadCustomers);
 
   async function loadSettings() {
     try {

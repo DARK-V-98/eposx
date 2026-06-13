@@ -2,9 +2,9 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './TitleBar.css';
 import { VscChromeMinimize, VscChromeMaximize, VscChromeClose } from 'react-icons/vsc';
-import { HiOutlineBell } from 'react-icons/hi';
+import { HiOutlineBell, HiOutlineMenu } from 'react-icons/hi';
 
-const TitleBar = ({ onOpenNotifications, notificationCount = 0, logo }) => {
+const TitleBar = ({ onOpenNotifications, notificationCount = 0, logo, onToggleMobileNav, isLoggedIn }) => {
   const handleMinimize = () => window.api.window.minimize();
   const handleMaximize = () => window.api.window.maximize();
   const handleClose    = () => window.api.window.close();
@@ -18,6 +18,13 @@ const TitleBar = ({ onOpenNotifications, notificationCount = 0, logo }) => {
     >
       {/* Animated accent line at very bottom of bar */}
       <div className="title-bar-accent-line" />
+
+      {/* Mobile hamburger — toggles the off-canvas sidebar drawer */}
+      {isLoggedIn && (
+        <button className="mobile-nav-toggle" onClick={onToggleMobileNav} title="Menu" aria-label="Open menu">
+          <HiOutlineMenu />
+        </button>
+      )}
 
       <div className="title-bar-drag-region">
         <div className="title-bar-content">

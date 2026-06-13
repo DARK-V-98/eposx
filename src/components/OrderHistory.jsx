@@ -10,6 +10,7 @@ import {
   HiOutlineX
 } from 'react-icons/hi';
 import ReceiptModal from './ReceiptModal';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import './OrderHistory.css';
 
 const api = window.api || {
@@ -36,6 +37,7 @@ export default function OrderHistory({ showToast }) {
     loadOrders();
     loadSettings();
   }, []);
+  useLiveRefresh(loadOrders);
 
   async function loadSettings() {
     try {

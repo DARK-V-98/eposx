@@ -30,6 +30,7 @@ import {
 } from 'react-icons/hi';
 import './POSScreen.css';
 import ReceiptModal from './ReceiptModal';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 
 const api = (window.api && window.api.sales) ? window.api : {
   products: { getAll: async () => [], search: async () => [] },
@@ -83,6 +84,13 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
 
   // ── #10 Cash tendered (for change calculation) ────────────
   const [cashTendered, setCashTendered] = useState('');
+
+  // ── Coupon / Loyalty / Credit ─────────────────────────────
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null); // { code, type, value }
+  const [couponError, setCouponError] = useState('');
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(''); // '' = pay in full
 
   // ── #6 Barcode Scanner ───────────────────────────────────
   const barcodeBuffer = useRef('');
@@ -146,6 +154,9 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
     return () => clearInterval(timer);
   }, []);
 
+  // Reset loyalty redemption when the selected customer changes
+  useEffect(() => { setRedeemPoints(0); }, [selectedCustomer?.id]);
+
   // Settings state
   const [settings, setSettings] = useState({
     currency: 'LKR',
@@ -200,6 +211,8 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
   const [categories, setCategories] = useState([]);
   
   useEffect(() => { loadCategories(); }, []);
+  // Live refresh products/services when another device changes data (cloud stores)
+  useLiveRefresh(() => { loadData(); loadCategories(); }, ['products', 'services', 'categories']);
 
   async function loadCategories() {
     try { setCategories(await api.categories.getAll()); } catch (e) { console.error(e); }
@@ -307,24 +320,66 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
     setDiscount(0);
     setSelectedCustomer(null);
     setBillNote('');
+    setCouponCode('');
+    setAppliedCoupon(null);
+    setCouponError('');
+    setRedeemPoints(0);
+    setAmountPaid('');
+  }
+
+  // ── Coupon ─────────────────────────────────────────────────
+  async function applyCoupon() {
+    const code = couponCode.trim();
+    if (!code) return;
+    const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    try {
+      const res = await api.coupons.validate(code, sub);
+      setAppliedCoupon({ code: res.code, type: res.type, value: res.value });
+      setCouponError('');
+      showToast(`Coupon ${res.code} applied`, 'success');
+    } catch (e) {
+      setAppliedCoupon(null);
+      setCouponError(e.message || 'Invalid coupon');
+    }
+  }
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
   }
 
   // ── Totals ─────────────────────────────────────────────────
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-    // Calculate discount amount based on type
-    const calculatedDiscount = discountType === 'percent' 
+    // Manual discount (percent or fixed)
+    const calculatedDiscount = discountType === 'percent'
       ? (subtotal * Number(discount || 0)) / 100
       : Number(discount || 0);
-
     const actualDiscount = Math.min(calculatedDiscount, subtotal);
-    const taxableAmount = Math.max(0, subtotal - actualDiscount);
-    const taxValue = (taxableAmount * Number(settings.tax_percentage || 0)) / 100;
-    const total = taxableAmount + taxValue;
 
-    return { subtotal, discountAmount: actualDiscount, taxValue, total };
-  }, [cart, discount, discountType, settings.tax_percentage]);
+    // Coupon discount (recomputed from the validated coupon so it tracks cart changes)
+    let couponDiscount = 0;
+    if (appliedCoupon) {
+      couponDiscount = appliedCoupon.type === 'fixed'
+        ? appliedCoupon.value
+        : (subtotal * appliedCoupon.value) / 100;
+      couponDiscount = Math.max(0, Math.min(couponDiscount, subtotal - actualDiscount));
+    }
+
+    const taxableAmount = Math.max(0, subtotal - actualDiscount - couponDiscount);
+    const taxValue = (taxableAmount * Number(settings.tax_percentage || 0)) / 100;
+    const preTotal = taxableAmount + taxValue;
+
+    // Loyalty redemption (each point worth loyalty_redeem_value)
+    const redeemPer = Number(settings.loyalty_redeem_value || 1);
+    const redeemValue = Math.min((Number(redeemPoints) || 0) * redeemPer, preTotal);
+
+    const total = Math.max(0, preTotal - redeemValue);
+    const storedDiscount = actualDiscount + couponDiscount + redeemValue;
+
+    return { subtotal, discountAmount: actualDiscount, couponDiscount, taxValue, redeemValue, total, storedDiscount };
+  }, [cart, discount, discountType, settings.tax_percentage, settings.loyalty_redeem_value, appliedCoupon, redeemPoints]);
 
   // ── Hold / Park Bill ───────────────────────────────────────
   function handleHoldBill() {
@@ -376,6 +431,11 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
     if (splitEnabled && !splitValid) {
       showToast('Split amounts must equal the total', 'error'); return;
     }
+    // Partial / credit payment (only when not splitting)
+    const paidEntered = !splitEnabled && amountPaid !== '' ? Number(amountPaid) : null;
+    if (paidEntered != null && paidEntered < totals.total && !selectedCustomer) {
+      showToast('Select a customer to record a credit / due', 'error'); return;
+    }
     try {
       const sale = {
         customer_id: selectedCustomer?.id || null,
@@ -387,13 +447,16 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
           price: item.price,
         })),
         subtotal: Math.round(totals.subtotal * 100) / 100,
-        discount: Math.round(totals.discountAmount * 100) / 100,
+        discount: Math.round(totals.storedDiscount * 100) / 100,
         tax: Math.round(totals.taxValue * 100) / 100,
         total: Math.round(totals.total * 100) / 100,
         payment_method: splitEnabled ? 'split' : paymentMethod,
         split_cash: splitEnabled ? parseFloat(splitCash) || 0 : undefined,
         split_card: splitEnabled ? parseFloat(splitCard) || 0 : undefined,
         notes: billNote,
+        coupon_code: appliedCoupon?.code,
+        points_redeemed: Number(redeemPoints) || 0,
+        amount_paid: paidEntered != null ? Math.round(paidEntered * 100) / 100 : undefined,
       };
       const result = await api.sales.create(sale);
       
@@ -710,12 +773,46 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
               />
             </div>
 
+            {/* Coupon code */}
+            <div className="pos-coupon-row">
+              {appliedCoupon ? (
+                <div className="pos-coupon-applied">
+                  <span>🎟️ {appliedCoupon.code} applied</span>
+                  <button className="pos-coupon-remove" onClick={removeCoupon}>Remove</button>
+                </div>
+              ) : (
+                <div className="pos-coupon-input">
+                  <input
+                    className="input"
+                    placeholder="Coupon code"
+                    value={couponCode}
+                    onChange={(e) => { setCouponCode(e.target.value); setCouponError(''); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') applyCoupon(); }}
+                  />
+                  <button className="btn btn-secondary btn-sm" onClick={applyCoupon}>Apply</button>
+                </div>
+              )}
+              {couponError && <div className="pos-coupon-error">{couponError}</div>}
+            </div>
+
             <div className="cart-totals">
               <div className="cart-total-row"><span>Subtotal</span><span>{formatPrice(totals.subtotal)}</span></div>
               {totals.discountAmount > 0 && (
                 <div className="cart-total-row discount">
                   <span>Discount {discountType === 'percent' ? `(${discount}%)` : ''}</span>
                   <span>-{formatPrice(totals.discountAmount)}</span>
+                </div>
+              )}
+              {totals.couponDiscount > 0 && (
+                <div className="cart-total-row discount">
+                  <span>Coupon ({appliedCoupon?.code})</span>
+                  <span>-{formatPrice(totals.couponDiscount)}</span>
+                </div>
+              )}
+              {totals.redeemValue > 0 && (
+                <div className="cart-total-row discount">
+                  <span>Points redeemed ({redeemPoints})</span>
+                  <span>-{formatPrice(totals.redeemValue)}</span>
                 </div>
               )}
               <div className="cart-total-row">
@@ -918,6 +1015,57 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
                   </div>
                 )}
               </div>
+
+              {/* Loyalty redemption */}
+              {selectedCustomer && (selectedCustomer.loyalty_points || 0) > 0 && (
+                <div className="checkout-loyalty">
+                  <p className="checkout-section-label">
+                    ⭐ Loyalty — {selectedCustomer.loyalty_points} points available
+                    <span className="loyalty-hint"> (1 pt = {formatPrice(Number(settings.loyalty_redeem_value || 1))})</span>
+                  </p>
+                  <div className="loyalty-redeem-row">
+                    <input
+                      className="input"
+                      type="number"
+                      min={0}
+                      max={selectedCustomer.loyalty_points}
+                      placeholder="Points to redeem"
+                      value={redeemPoints || ''}
+                      onChange={(e) => {
+                        const redeemPer = Number(settings.loyalty_redeem_value || 1);
+                        const maxByPreTotal = Math.floor((totals.total + totals.redeemValue) / redeemPer);
+                        const v = Math.max(0, Math.min(Number(e.target.value) || 0, selectedCustomer.loyalty_points, maxByPreTotal));
+                        setRedeemPoints(v);
+                      }}
+                    />
+                    <button className="btn btn-ghost btn-sm" onClick={() => setRedeemPoints(0)}>Clear</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Partial / credit payment */}
+              {!splitEnabled && (
+                <div className="checkout-credit">
+                  <p className="checkout-section-label">
+                    💳 Amount Paid <span className="loyalty-hint">(leave blank to pay in full)</span>
+                  </p>
+                  <input
+                    className="input"
+                    type="number"
+                    min={0}
+                    placeholder={`Full: ${formatPrice(totals.total)}`}
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value)}
+                  />
+                  {amountPaid !== '' && Number(amountPaid) < totals.total && (
+                    <div className="credit-due-note">
+                      {selectedCustomer
+                        ? <>Due to {selectedCustomer.name}: <strong>{formatPrice(totals.total - Number(amountPaid))}</strong> (credit)</>
+                        : <span className="credit-warn">⚠️ Select a customer to record the credit</span>}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => setShowCheckout(false)}>Cancel</button>

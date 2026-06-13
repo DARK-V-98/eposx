@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlineCreditCard, HiOutlineCash, HiOutlineX, HiOutlineUser } from 'react-icons/hi';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import './FeaturePages.css';
 
 const api = window.api || {
@@ -16,6 +17,7 @@ export default function DuesManagement({ showToast }) {
   const [payAmounts, setPayAmounts] = useState({});
 
   useEffect(() => { load(); }, []);
+  useLiveRefresh(load);
 
   async function load() {
     try {

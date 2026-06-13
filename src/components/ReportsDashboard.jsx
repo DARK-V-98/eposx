@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart,
@@ -44,6 +45,7 @@ export default function ReportsDashboard({ showToast, settings }) {
   const [period, setPeriod] = useState('7');
 
   useEffect(() => { loadAll(); }, []);
+  useLiveRefresh(loadAll);
 
   useEffect(() => { loadDailySummary(); }, [period]);
 

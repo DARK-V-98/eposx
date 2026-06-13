@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HiOutlineCash, HiOutlineLockOpen, HiOutlineLockClosed, HiOutlinePrinter } from 'react-icons/hi';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import './FeaturePages.css';
 
 const api = window.api || {
@@ -17,6 +18,7 @@ export default function CashDrawer({ showToast }) {
   const [closeNote, setCloseNote] = useState('');
 
   useEffect(() => { load(); }, []);
+  useLiveRefresh(load);
 
   async function load() {
     try {

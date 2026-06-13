@@ -12,7 +12,7 @@ import {
 export default function UserManagement({ showToast }) {
   const [users, setUsers] = useState([
     { id: 1, email: 'esystemlk@gmail.com', role: 'Developer', status: 'Active' },
-    { id: 2, email: 'tikfese@gmail.com', role: 'Admin', status: 'Active' },
+    { id: 2, email: 'admin@eposx.com', role: 'Admin', status: 'Active' },
     { id: 3, email: 'manager@eposx.com', role: 'Manager', status: 'Active' },
     { id: 4, email: 'cashier1@eposx.com', role: 'Cashier', status: 'Active' },
   ]);
@@ -100,7 +100,7 @@ export default function UserManagement({ showToast }) {
                         className="btn btn-icon btn-ghost btn-danger" 
                         title="Delete"
                         onClick={() => deleteUser(user.id)}
-                        disabled={user.email === 'tikfese@gmail.com' || user.email === 'esystemlk@gmail.com'}
+                        disabled={user.email === 'admin@eposx.com' || user.email === 'esystemlk@gmail.com'}
                       >
                         <HiOutlineTrash />
                       </button>

@@ -1095,3 +1095,28 @@
   font-size: 16px;
   color: var(--success);
 }
+
+/* ── Coupon / Loyalty / Credit (checkout) ───────────────── */
+.pos-coupon-row { margin: 10px 0; }
+.pos-coupon-input { display: flex; gap: 8px; }
+.pos-coupon-input .input { flex: 1; min-width: 0; }
+.pos-coupon-applied {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;
+  border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600;
+}
+.pos-coupon-remove {
+  background: none; border: none; color: #dc2626; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+}
+.pos-coupon-error { color: #dc2626; font-size: 12px; margin-top: 6px; }
+
+.checkout-loyalty, .checkout-credit {
+  padding: 14px 0; border-top: 1px solid var(--border, rgba(0,0,0,0.08));
+}
+.loyalty-hint { font-weight: 400; color: var(--text-secondary, #9ca3af); font-size: 12px; }
+.loyalty-redeem-row { display: flex; gap: 8px; }
+.loyalty-redeem-row .input { flex: 1; min-width: 0; }
+.checkout-credit .input { width: 100%; box-sizing: border-box; }
+.credit-due-note { margin-top: 8px; font-size: 13px; color: #b45309; }
+.credit-warn { color: #dc2626; }

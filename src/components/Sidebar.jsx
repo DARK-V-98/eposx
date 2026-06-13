@@ -66,6 +66,7 @@ const navItemVariants = {
 export default function Sidebar({
   logo, activePage, onNavigate, collapsed, onToggleCollapse,
   parkedCount = 0, userRole = 'User', isPlatformAdmin = false, onLogout,
+  mobileOpen = false,
 }) {
   function openDevSite(e) {
     e.preventDefault();
@@ -80,7 +81,7 @@ export default function Sidebar({
 
   return (
     <motion.aside
-      className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+      className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
       animate={{ width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)' }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >

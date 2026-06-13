@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import {
   HiOutlineDocumentText, HiOutlinePlus, HiOutlineTrash, HiOutlineSearch,
   HiOutlineSwitchHorizontal, HiOutlinePrinter, HiOutlineX,
@@ -34,6 +35,7 @@ export default function QuotationManagement({ showToast }) {
   const [notes, setNotes] = useState('');
 
   useEffect(() => { loadAll(); }, []);
+  useLiveRefresh(loadAll);
 
   async function loadAll() {
     try {

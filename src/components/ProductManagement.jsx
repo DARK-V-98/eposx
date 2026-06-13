@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { uploadProductImage, isRemoteImage } from '../services/storageService';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlinePlus,
@@ -104,6 +105,7 @@ export default function ProductManagement({ showToast, currentStore }) {
   const [catForm, setCatForm] = useState({ name: '', parent_id: '', type: 'product' });
 
   useEffect(() => { loadProducts(); loadServices(); loadSettings(); loadCategories(); }, []);
+  useLiveRefresh(() => { loadProducts(); loadServices(); loadCategories(); });
 
   async function loadSettings() {
     try {

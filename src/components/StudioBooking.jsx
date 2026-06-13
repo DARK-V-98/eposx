@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useLiveRefresh from '../hooks/useLiveRefresh';
 import {
   HiOutlinePlus,
   HiOutlineTrash,
@@ -55,6 +56,7 @@ export default function StudioBooking({ showToast }) {
   const [settings, setSettings] = useState({ currency: 'LKR' });
 
   useEffect(() => { loadData(); loadSettings(); }, []);
+  useLiveRefresh(loadData);
 
   async function loadSettings() {
     try {

@@ -1,0 +1,210 @@
+/* ============================================================
+   Responsive / mobile layer for E POS X
+   Desktop-first app adapted for phones & tablets.
+   ============================================================ */
+
+/* Hamburger is desktop-hidden; shown on mobile (see media query). */
+.mobile-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 22px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.mobile-nav-toggle:active { opacity: 0.7; }
+
+/* On web/mobile the Electron window controls do nothing — hide them. */
+html[data-platform="web"] .title-bar-controls .minimize,
+html[data-platform="web"] .title-bar-controls .maximize,
+html[data-platform="web"] .title-bar-controls .close {
+  display: none;
+}
+
+.mobile-nav-overlay { display: none; }
+
+/* ------------------------------------------------------------
+   Form fields must never overflow their container.
+   CSS grid/flex items default to min-width:auto, so inputs in
+   2-column rows (e.g. Price | Cost) push past the screen. These
+   rules are safe on all viewports.
+   ------------------------------------------------------------ */
+.modal input,
+.modal select,
+.modal textarea,
+.input,
+input.input,
+select.input,
+textarea.input {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Let inline grid/flex form rows shrink their tracks */
+.modal [style*="grid-template-columns"] > *,
+.modal [style*="display: grid"] > *,
+.modal [style*="display: flex"] > * {
+  min-width: 0;
+}
+
+/* Class-based grids must also allow their tracks to shrink */
+.quote-builder > *,
+.qb-cart-row > *,
+.returns-action > * {
+  min-width: 0;
+}
+.qb-catalog,
+.qb-cart,
+.qb-catalog-list,
+.qb-cart-list,
+.qb-search,
+.qb-meta,
+.qb-totals {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   Tablets and below
+   ============================================================ */
+@media (max-width: 1024px) {
+  .pos-cart { width: 320px; }
+  .pos-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; }
+}
+
+/* ============================================================
+   Phones (<= 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .mobile-nav-toggle { display: inline-flex; }
+  .mobile-nav-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 900;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Sidebar becomes an off-canvas drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 82vw !important;
+    max-width: 300px;
+    /* !important needed to beat framer-motion's inline transform */
+    transform: translateX(-105%) !important;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 950;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.4);
+  }
+  .sidebar.mobile-open { transform: translateX(0) !important; }
+  /* The desktop collapse toggle is irrelevant on mobile */
+  .sidebar-toggle { display: none; }
+
+  .main-content { width: 100% !important; }
+  .page-container { padding: 14px 12px; -webkit-overflow-scrolling: touch; }
+
+  /* Page headers stack */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .page-title { font-size: 20px; }
+  .page-subtitle { font-size: 13px; }
+  .page-header .btn,
+  .page-header button { width: 100%; justify-content: center; }
+
+  /* Tables scroll horizontally instead of squashing */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-container table { min-width: 560px; }
+
+  /* Modals near full-screen, scrollable */
+  .modal,
+  .modal.quote-modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .modal-footer { flex-wrap: wrap; }
+  .modal-footer .btn { flex: 1; min-width: 120px; justify-content: center; }
+
+  /* KPI / stat grids → single column comfortable cards */
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+
+  /* ── POS screen: stack products over cart ── */
+  .pos-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 48px);
+    margin: -14px -12px;
+  }
+  .pos-products { border-right: none; border-bottom: 1px solid var(--border); }
+  .pos-cart { width: 100% !important; }
+  .pos-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important; }
+  .pos-topbar { flex-wrap: wrap; gap: 8px; }
+  .pos-categories { overflow-x: auto; }
+
+  /* Quotation builder stacks */
+  .quote-builder { grid-template-columns: 1fr; }
+  .qb-catalog-list { max-height: 220px; }
+  .qb-meta { flex-wrap: wrap; }
+  .qb-cart-row { grid-template-columns: 1fr 56px 76px 32px; }
+
+  /* Returns action panel stacks (already has its own query, reinforce) */
+  .returns-action { grid-template-columns: 1fr; }
+
+  /* Access / package screens */
+  .pkg-grid { grid-template-columns: 1fr; }
+  .access-form { flex-direction: column; }
+  .access-card { padding: 24px; }
+
+  /* Login: hide the marketing panel, full-width form */
+  .login-right { display: none; }
+  .login-left { width: 100%; }
+  .login-card { max-width: 100%; }
+
+  /* Trial banner wraps nicely */
+  .trial-banner { margin: 10px 12px 0; font-size: 13px; }
+
+  /* Bigger tap targets */
+  .btn, .nav-item, .control-button { min-height: 40px; }
+
+  /* App-wide safety: no form row or input may overflow the screen */
+  [style*="grid-template-columns"] > *,
+  [style*="display: grid"] > *,
+  [style*="display: flex"] > * { min-width: 0; }
+  input, select, textarea { max-width: 100%; box-sizing: border-box; }
+
+  /* Tab rows scroll horizontally instead of overflowing */
+  .pm-tabs, .pos-tabs, .pm-tab-row, .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ============================================================
+   Small phones (<= 420px)
+   ============================================================ */
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .pos-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)) !important; }
+  .title-bar-text { font-size: 12px; }
+  .page-title { font-size: 18px; }
+}
