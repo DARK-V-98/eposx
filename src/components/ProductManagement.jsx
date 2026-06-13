@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { uploadProductImage, isRemoteImage } from '../services/storageService';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlinePlus,
@@ -71,7 +72,11 @@ const emptyService = {
   name: '', category: 'Hair', price: '', duration_minutes: 60, description: '',
 };
 
-export default function ProductManagement({ showToast }) {
+export default function ProductManagement({ showToast, currentStore }) {
+  const fileInputRef = useRef(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  // Web/cloud build uses Firebase Storage; offline Electron uses native picker.
+  const isWebMode = typeof window !== 'undefined' && window.api?.__mode === 'http';
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'services' | 'categories'
   const [settings, setSettings] = useState({ currency: 'LKR' });
 
@@ -125,11 +130,37 @@ export default function ProductManagement({ showToast }) {
 
   // ── Product image picker ───────────────────────────────────
   async function pickImage() {
+    // Web / cloud: open the browser file dialog → upload to Firebase Storage.
+    if (isWebMode || !api.dialog?.openImage) {
+      fileInputRef.current?.click();
+      return;
+    }
+    // Offline Electron: native file dialog returning a local path.
     try {
       const path = await api.dialog.openImage();
       if (path) setForm((f) => ({ ...f, image: path }));
     } catch (e) { showToast('Could not open file picker', 'error'); }
   }
+
+  async function handleFileUpload(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB', 'error'); return; }
+    setUploadingImage(true);
+    try {
+      const { url } = await uploadProductImage(file, currentStore?.id || 'default');
+      setForm((f) => ({ ...f, image: url }));
+      showToast('Image uploaded', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || 'Image upload failed (check Storage rules)', 'error');
+    }
+    setUploadingImage(false);
+  }
+
+  // Resolve how to display a stored image value (remote URL vs local path).
+  const imageSrc = (val) => (isRemoteImage(val) ? val : `local-resource://${val}`);
 
   // ── Product CRUD ───────────────────────────────────────────
   const productCategories = ['All', ...new Set(products.map((p) => p.category))];
@@ -341,8 +372,8 @@ export default function ProductManagement({ showToast }) {
                 {/* Image */}
                 <div className="pm-product-card-image">
                   {product.image ? (
-                    <img 
-                      src={`local-resource://${product.image}`} 
+                    <img
+                      src={imageSrc(product.image)}
                       alt={product.name}
                       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                     />
@@ -552,7 +583,7 @@ export default function ProductManagement({ showToast }) {
                 <div className="pm-image-picker">
                   <div className="pm-image-preview">
                     {form.image ? (
-                      <img src={`local-resource://${form.image}`} alt="Product" />
+                      <img src={imageSrc(form.image)} alt="Product" />
                     ) : (
                       <div className="pm-image-placeholder">
                         <HiOutlinePhotograph />
@@ -561,15 +592,24 @@ export default function ProductManagement({ showToast }) {
                     )}
                   </div>
                   <div className="pm-image-actions">
-                    <button className="btn btn-secondary btn-sm" onClick={pickImage}>
-                      <HiOutlinePhotograph /> Choose Image
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                    />
+                    <button className="btn btn-secondary btn-sm" onClick={pickImage} disabled={uploadingImage}>
+                      <HiOutlinePhotograph /> {uploadingImage ? 'Uploading…' : 'Choose Image'}
                     </button>
                     {form.image && (
                       <button className="btn btn-ghost btn-sm" onClick={() => setForm({ ...form, image: '' })}>
                         Remove
                       </button>
                     )}
-                    <p className="pm-image-hint">Recommended: square image 200×200px+</p>
+                    <p className="pm-image-hint">
+                      {isWebMode ? 'Uploaded to Firebase Storage · under 5MB' : 'Recommended: square image 200×200px+'}
+                    </p>
                   </div>
                 </div>
 

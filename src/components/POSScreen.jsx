@@ -508,9 +508,9 @@ export default function POSScreen({ showToast, parkedBills = [], onHoldBill, onD
                 {/* Product image or emoji */}
                 <div className="product-card-image">
                   {item.image ? (
-                    <img 
-                      src={`local-resource://${item.image}`} 
-                      alt={item.name} 
+                    <img
+                      src={/^https?:\/\//.test(item.image) ? item.image : `local-resource://${item.image}`}
+                      alt={item.name}
                       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                     />
                   ) : null}

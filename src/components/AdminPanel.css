@@ -1,0 +1,13 @@
+.grant-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.grant-option strong { font-size: 15px; }
+.grant-option p { margin: 4px 0 0; font-size: 13px; }
+.btn-sm { padding: 6px 10px; font-size: 13px; }

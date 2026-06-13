@@ -14,6 +14,8 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAILS8VAnHeG2a1dxc8TeZ2k39pYeA8p3U',
@@ -27,6 +29,8 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const firestore = getFirestore(app);
+export const storage = getStorage(app);
 
 // Keep the user signed in across reloads (web + desktop).
 setPersistence(auth, browserLocalPersistence).catch(() => {});

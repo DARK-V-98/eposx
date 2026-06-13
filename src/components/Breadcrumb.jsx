@@ -19,6 +19,7 @@ const pageLabels = {
   coupons:   { label: 'Coupons',           emoji: '🎟️' },
   reports:   { label: 'Reports',          emoji: '📊' },
   users:     { label: 'User Management',  emoji: '👤' },
+  admin:     { label: 'Admin — Access',   emoji: '🛡️' },
   settings:  { label: 'Settings',         emoji: '⚙️' },
 };
 

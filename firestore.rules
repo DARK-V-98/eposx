@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Platform admin(s) who manage all licenses
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['esystemlk@gmail.com'];
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── Stores / licenses ────────────────────────────────
+    match /stores/{storeId} {
+      // Owner can read their own store; admin can read all
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+
+      // A signed-in user may create a store request for themselves,
+      // and it must start as 'pending' (they can't self-grant access).
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      // Only the admin can approve / change license status / lock.
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Cloud-package business data (next phase) ─────────
+    // Each store's POS data lives under its own document tree and is
+    // accessible only to the owner or admin.
+    match /stores/{storeId}/{document=**} {
+      allow read, write: if isAdmin()
+        || (isSignedIn()
+            && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == request.auth.uid);
+    }
+  }
+}

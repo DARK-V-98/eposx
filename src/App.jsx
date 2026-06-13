@@ -28,7 +28,10 @@ import loginBg from './assets/login-bg.png';
 import logo from './assets/logo.png';
 import hardwareHub from './services/hardwareService';
 import { onAuthStateChanged, signOut as fbSignOut, initAnalyticsIfSupported } from './firebase';
-import { resolveRole } from './auth/roles';
+import { resolveRole, isPlatformAdmin } from './auth/roles';
+import { getActiveStore, requestAccess, effectiveStatus, daysLeft } from './services/licenseService';
+import { PackageSelection, StatusScreen } from './components/AccessScreens';
+import AdminPanel from './components/AdminPanel';
 
 const pages = {
   pos:       POSScreen,
@@ -47,6 +50,7 @@ const pages = {
   studio:    StudioBooking,
   reports:   ReportsDashboard,
   users:     UserManagement,
+  admin:     AdminPanel,
   settings:  SettingsManagement,
 };
 
@@ -68,6 +72,10 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn]           = useState(false);
   const [userRole, setUserRole]               = useState('User');
   const [currentUser, setCurrentUser]         = useState(null);
+  // Access / licensing gate
+  const [accessState, setAccessState]         = useState('loading'); // loading|need-store|pending|rejected|trial|active|expired|locked
+  const [currentStore, setCurrentStore]       = useState(null);
+  const [isAdmin, setIsAdmin]                 = useState(false);
   const [activePage, setActivePage]           = useState('pos');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toasts, setToasts]                   = useState([]);
@@ -163,22 +171,55 @@ export default function App() {
     const unsub = onAuthStateChanged((user) => {
       if (user) {
         const role = resolveRole(user.email);
-        setCurrentUser({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName,
-          photo: user.photoURL,
-        });
+        const u = { uid: user.uid, email: user.email, name: user.displayName, photo: user.photoURL };
+        setCurrentUser(u);
         setUserRole(role);
         setIsLoggedIn(true);
+        checkAccess(u);
       } else {
         setCurrentUser(null);
         setUserRole('User');
         setIsLoggedIn(false);
+        setAccessState('loading');
+        setCurrentStore(null);
+        setIsAdmin(false);
       }
     });
     return () => unsub();
   }, []);
+
+  // Resolve the user's licensing state from Firestore.
+  const checkAccess = useCallback(async (user) => {
+    if (isPlatformAdmin(user.email)) {
+      // Platform admin always has access and sees the Admin panel.
+      setIsAdmin(true);
+      setAccessState('active');
+      return;
+    }
+    setIsAdmin(false);
+    setAccessState('loading');
+    try {
+      const store = await getActiveStore(user.uid);
+      if (!store) { setCurrentStore(null); setAccessState('need-store'); return; }
+      setCurrentStore(store);
+      setAccessState(effectiveStatus(store)); // pending|trial|active|expired|locked|rejected
+    } catch (err) {
+      console.error('[E POS X] Access check failed:', err);
+      // Fail safe: let them see the request screen rather than a blank app.
+      setAccessState('need-store');
+    }
+  }, []);
+
+  const handleRequestAccess = useCallback(async ({ storeName, pkg }) => {
+    try {
+      const store = await requestAccess({ uid: currentUser.uid, email: currentUser.email, storeName, pkg });
+      setCurrentStore(store);
+      setAccessState('pending');
+      showToast('Access request sent! Awaiting approval.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Could not send request (check Firestore rules)', 'error');
+    }
+  }, [currentUser, showToast]);
 
   // Real Google sign-in flips state via the onAuthStateChanged listener above.
   // This handler covers the email/password dev bypass form.
@@ -187,6 +228,9 @@ export default function App() {
     setCurrentUser({ email, name: email, photo: null });
     setUserRole(resolveRole(email));
     setIsLoggedIn(true);
+    // Dev bypass skips the Firestore licensing gate.
+    setIsAdmin(isPlatformAdmin(email));
+    setAccessState('active');
     showToast('Login successful! Welcome to EPOSX.', 'success');
   };
 
@@ -205,6 +249,7 @@ export default function App() {
     showToast('Logged out successfully.', 'info');
   }, [showToast]);
 
+  const showApp = isLoggedIn && (isAdmin || accessState === 'active' || accessState === 'trial');
   const ActiveComponent = pages[activePage];
 
   return (
@@ -233,6 +278,16 @@ export default function App() {
           >
             <Login onLogin={handleLogin} onGoogleSignedIn={handleGoogleSignedIn} bgImage={loginBg} logo={logo} />
           </motion.div>
+        ) : !showApp ? (
+          <motion.div key="gate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+            {accessState === 'loading' ? (
+              <div className="access-screen"><div className="access-card"><h1>Checking access…</h1><p>Verifying your E POS X license.</p></div></div>
+            ) : accessState === 'need-store' ? (
+              <PackageSelection user={currentUser} onSubmit={handleRequestAccess} onLogout={handleLogout} />
+            ) : (
+              <StatusScreen status={accessState} store={currentStore} onLogout={handleLogout} onRefresh={() => checkAccess(currentUser)} />
+            )}
+          </motion.div>
         ) : (
           <motion.div
             key="app-body"
@@ -251,10 +306,19 @@ export default function App() {
                 onToggleCollapse={() => setSidebarCollapsed(v => !v)}
                 parkedCount={parkedBills.length}
                 userRole={userRole}
+                isPlatformAdmin={isAdmin}
                 onLogout={handleLogout}
               />
 
               <main className={`main-content ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+                {/* Trial countdown banner */}
+                {accessState === 'trial' && currentStore && (
+                  <div className="trial-banner">
+                    ⏳ Trial — {daysLeft(currentStore)} day{daysLeft(currentStore) === 1 ? '' : 's'} left for <strong>{currentStore.storeName}</strong>.
+                    <a href="https://www.esystemlk.com" target="_blank" rel="noreferrer"> Purchase to keep your data →</a>
+                  </div>
+                )}
+
                 {/* ── #4 Breadcrumb ── */}
                 <Breadcrumb activePage={activePage} onNavigate={setActivePage} />
 
@@ -267,6 +331,8 @@ export default function App() {
                     <ActiveComponent
                       showToast={showToast}
                       userRole={userRole}
+                      adminEmail={currentUser?.email}
+                      currentStore={currentStore}
                       settings={settings}
                       onUpdateSettings={setSettings}
                       addNotification={addNotification}

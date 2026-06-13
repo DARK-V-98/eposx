@@ -21,6 +21,15 @@ export const ROLE_MAP = {
   'tikfese@gmail.com': 'Admin',
 };
 
+// Platform admins — these accounts manage licensing/access for ALL stores
+// (approve requests, grant trials/lifetime, lock accounts).
+export const PLATFORM_ADMINS = ['esystemlk@gmail.com'];
+
+export function isPlatformAdmin(email) {
+  if (!email) return false;
+  return PLATFORM_ADMINS.includes(email.trim().toLowerCase());
+}
+
 export function resolveRole(email) {
   if (!email) return DEFAULT_ROLE;
   return ROLE_MAP[email.trim().toLowerCase()] || DEFAULT_ROLE;

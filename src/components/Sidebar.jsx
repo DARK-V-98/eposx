@@ -24,6 +24,7 @@ import {
   HiOutlineCreditCard,
   HiOutlineTicket,
   HiOutlineCalculator,
+  HiOutlineShieldCheck,
 } from 'react-icons/hi';
 import './Sidebar.css';
 
@@ -43,6 +44,7 @@ const navItems = [
   { id: 'coupons',   label: 'Coupons',              icon: HiOutlineTicket },
   { id: 'reports',   label: 'Reports',              icon: HiOutlinePresentationChartBar },
   { id: 'users',     label: 'User Management',      icon: HiOutlineUserGroup, adminOnly: true },
+  { id: 'admin',     label: 'Admin — Access',       icon: HiOutlineShieldCheck, platformAdminOnly: true },
   { id: 'settings',  label: 'Settings',             icon: HiOutlineCog },
 ];
 
@@ -63,14 +65,18 @@ const navItemVariants = {
 
 export default function Sidebar({
   logo, activePage, onNavigate, collapsed, onToggleCollapse,
-  parkedCount = 0, userRole = 'User', onLogout,
+  parkedCount = 0, userRole = 'User', isPlatformAdmin = false, onLogout,
 }) {
   function openDevSite(e) {
     e.preventDefault();
     try { api.shell.openExternal('https://www.esystemlk.com'); } catch (_) {}
   }
 
-  const visibleItems = navItems.filter(item => !item.adminOnly || userRole === 'Admin' || userRole === 'Developer');
+  const visibleItems = navItems.filter(item => {
+    if (item.platformAdminOnly) return isPlatformAdmin;
+    if (item.adminOnly) return userRole === 'Admin' || userRole === 'Developer';
+    return true;
+  });
 
   return (
     <motion.aside

@@ -1088,3 +1088,16 @@ tr:hover td {
   color: var(--text-primary);
 }
 
+
+/* ── Trial countdown banner ─────────────────────────── */
+.trial-banner {
+  background: linear-gradient(90deg, #fff7ed, #ffedd5);
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  padding: 10px 16px;
+  border-radius: 10px;
+  margin: 12px 16px 0;
+  font-size: 14px;
+}
+.trial-banner a { color: #c2410c; font-weight: 600; text-decoration: none; margin-left: 6px; }
+.trial-banner a:hover { text-decoration: underline; }
